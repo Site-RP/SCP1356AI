@@ -45,7 +45,7 @@ source .venv/bin/activate
 echo "[4/5] Requirements installieren..."
 
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+python -m pip install -r Requirements.txt
 
 
 echo "[5/5] SCP1356AI starten..."
