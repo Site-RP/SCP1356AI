@@ -1,0 +1,31 @@
+# Model weights (large binaries — don't commit)
+models/*.onnx
+models/*.onnx.json
+models/*.gguf
+
+# Hugging Face / model cache
+hf_cache/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Logs
+*.log
+
+# Environment variables / secrets
+.env
+*.env
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
