@@ -63,10 +63,12 @@ fi
 echo "[6/7] Qwen herunterladen..."
 
 if [ ! -f models/Qwen2.5-7B-Instruct-Q4_K_M.gguf ]; then
-    python -m huggingface_hub download \
-        Qwen/Qwen2.5-7B-Instruct-GGUF \
-        Qwen2.5-7B-Instruct-Q4_K_M.gguf \
-        --local-dir models
+pip install -U "huggingface_hub[cli]"
+
+huggingface-cli download \
+    Qwen/Qwen2.5-7B-Instruct-GGUF \
+    Qwen2.5-7B-Instruct-Q4_K_M.gguf \
+    --local-dir models
 fi
 
 echo "[7/7] SCP1356AI starten..."
