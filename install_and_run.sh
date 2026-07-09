@@ -1,242 +1,191 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# ═══════════════════════════════════════════════════════════════════════════
+# SCP-1356 AI Server – Full Installer
+# Klont https://github.com/Site-RP/SCP1356AI, installiert CUDA, alle Python-
+# Abhängigkeiten in einem venv, installiert (aber startet NICHT) cloudflared,
+# und startet den Server am Ende per nohup.
+#
+# One-Liner, um NUR dieses Skript zu holen und direkt auszuführen:
+#   curl -fsSL https://raw.githubusercontent.com/Site-RP/SCP1356AI/main/install.sh -o install.sh && chmod +x install.sh && ./install.sh
+#
+# (Passe den Branch-Namen "main" an, falls dein Repo z.B. "master" nutzt.)
+# ═══════════════════════════════════════════════════════════════════════════
 set -euo pipefail
 
+# ── Konfiguration ────────────────────────────────────────────────────────
 REPO_URL="https://github.com/Site-RP/SCP1356AI.git"
-PROJECT_DIR="SCP1356AI"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/SCP1356AI}"
+VENV_DIR="${INSTALL_DIR}/venv"
+CUDA_VERSION="12-4"                 # apt-Paketsuffix, z.B. cuda-toolkit-12-4
+SERVER_ENTRY="${SERVER_ENTRY:-server.py}"   # Passe an, falls die Startdatei anders heißt
+LOG_FILE="${INSTALL_DIR}/server.log"
 
-# Cloudflare Tunnel Konfiguration
-CF_HOSTNAME="app.ducktales.online"
-CF_LOCAL_PORT=5000
-# Tunnel-Token aus dem Cloudflare Zero Trust Dashboard (Networks -> Tunnels ->
-# dein Tunnel -> "Install and run a connector" -> Token). Am besten als
-# Umgebungsvariable setzen statt hart im Skript, z.B.:
-#   export CF_TUNNEL_TOKEN="eyJ..."
-#   ./install.sh
-CF_TUNNEL_TOKEN="${CF_TUNNEL_TOKEN:-}"
+log()  { echo -e "\n\033[1;32m[INSTALL]\033[0m $*"; }
+warn() { echo -e "\n\033[1;33m[WARN]\033[0m $*"; }
+err()  { echo -e "\n\033[1;31m[ERROR]\033[0m $*" >&2; }
 
-# ── Helper ───────────────────────────────────────────────────────────────────
-
-log()  { echo -e "\n\033[1;32m$1\033[0m"; }
-warn() { echo -e "\033[1;33m$1\033[0m" >&2; }
-err()  { echo -e "\033[1;31m$1\033[0m" >&2; }
-
-trap 'err "Fehler in Zeile $LINENO. Abbruch."' ERR
-
-# ── [0/8] Root-Check ─────────────────────────────────────────────────────────
-
-if [ "$EUID" -ne 0 ]; then
-    if command -v sudo >/dev/null 2>&1; then
-        SUDO="sudo"
-        warn "Skript läuft nicht als root — verwende sudo für apt-Befehle."
-    else
-        err "Bitte als root ausführen oder sudo installieren (für apt-get benötigt)."
-        exit 1
-    fi
-else
+if [[ $EUID -eq 0 ]]; then
     SUDO=""
+else
+    SUDO="sudo"
 fi
 
-# ── [1/9] System-Pakete ──────────────────────────────────────────────────────
+# ── 1. System-Pakete ─────────────────────────────────────────────────────
+log "Aktualisiere Paketlisten und installiere Basis-Pakete..."
+$SUDO apt-get update -y
+$SUDO DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    build-essential cmake ninja-build pkg-config \
+    git wget curl unzip ca-certificates gnupg lsb-release \
+    python3 python3-venv python3-dev python3-pip \
+    ffmpeg libsndfile1 libssl-dev \
+    software-properties-common apt-transport-https
 
-log "[1/9] System prüfen und Pakete installieren..."
-$SUDO apt-get update
-$SUDO apt-get install -y \
-    python3 \
-    python3-pip \
-    python3-venv \
-    python3-dev \
-    build-essential \
-    cmake \
-    pkg-config \
-    git \
-    wget \
-    curl \
-    ffmpeg \
-    libsndfile1
+# ── 2. NVIDIA Treiber-Check + CUDA Toolkit ───────────────────────────────
+log "Prüfe NVIDIA-Treiber..."
+if ! command -v nvidia-smi &>/dev/null; then
+    warn "nvidia-smi nicht gefunden. Stelle sicher, dass der NVIDIA-Treiber"
+    warn "auf dem HOST installiert ist bzw. --gpus all beim Docker-Run gesetzt ist."
+else
+    nvidia-smi || true
+fi
 
-# ── [2/9] GPU / CUDA Erkennung ───────────────────────────────────────────────
+if ! command -v nvcc &>/dev/null; then
+    log "Installiere CUDA Toolkit ${CUDA_VERSION}..."
+    UBUNTU_CODENAME=$(lsb_release -cs 2>/dev/null || echo "jammy")
+    UBUNTU_VER=$(lsb_release -rs 2>/dev/null | tr -d '.')
+    CUDA_KEYRING_URL="https://developer.download.nvidia.com/compute/cuda/repos/ubuntu${UBUNTU_VER}/x86_64/cuda-keyring_1.1-1_all.deb"
+    TMP_DEB="/tmp/cuda-keyring.deb"
 
-log "[2/9] GPU-Erkennung..."
-USE_CUDA=0
-if command -v nvidia-smi >/dev/null 2>&1; then
-    if nvidia-smi >/dev/null 2>&1; then
-        log "NVIDIA-GPU gefunden:"
-        nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader
-        if command -v nvcc >/dev/null 2>&1; then
-            log "CUDA-Toolkit (nvcc) gefunden — Build mit CUDA-Unterstützung."
-            USE_CUDA=1
-        else
-            warn "nvidia-smi vorhanden, aber 'nvcc' (CUDA-Toolkit) fehlt."
-            warn "llama-cpp-python würde ohne nvcc NICHT mit CUDA kompilieren können."
-            warn "Installiere ggf. das CUDA-Toolkit (z.B. via 'apt-get install nvidia-cuda-toolkit')"
-            warn "oder fahre ohne GPU-Beschleunigung fort (CPU-Fallback)."
-        fi
+    if wget -q "$CUDA_KEYRING_URL" -O "$TMP_DEB"; then
+        $SUDO dpkg -i "$TMP_DEB"
+        $SUDO apt-get update -y
+        $SUDO DEBIAN_FRONTEND=noninteractive apt-get install -y "cuda-toolkit-${CUDA_VERSION}" || \
+            warn "cuda-toolkit-${CUDA_VERSION} nicht verfügbar, versuche generisches 'cuda-toolkit'..." && \
+            ($SUDO DEBIAN_FRONTEND=noninteractive apt-get install -y cuda-toolkit || warn "CUDA Toolkit Installation fehlgeschlagen — bitte manuell prüfen.")
     else
-        warn "nvidia-smi vorhanden, aber Zugriff fehlgeschlagen — fahre mit CPU fort."
+        warn "Konnte CUDA-Keyring nicht laden (Ubuntu ${UBUNTU_VER} evtl. nicht unterstützt)."
+        warn "Bitte CUDA ggf. manuell installieren: https://developer.nvidia.com/cuda-downloads"
+    fi
+
+    # CUDA PATH persistieren
+    CUDA_HOME_GUESS="/usr/local/cuda"
+    if [[ -d "$CUDA_HOME_GUESS" ]]; then
+        {
+            echo "export PATH=${CUDA_HOME_GUESS}/bin\${PATH:+:\${PATH}}"
+            echo "export LD_LIBRARY_PATH=${CUDA_HOME_GUESS}/lib64\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}"
+        } >> "$HOME/.bashrc"
+        export PATH="${CUDA_HOME_GUESS}/bin${PATH:+:${PATH}}"
+        export LD_LIBRARY_PATH="${CUDA_HOME_GUESS}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     fi
 else
-    warn "Keine NVIDIA-GPU gefunden — Build läuft im CPU-Modus (langsamer)."
+    log "CUDA Toolkit bereits vorhanden: $(nvcc --version | tail -1)"
 fi
 
-# ── [3/9] Repository ─────────────────────────────────────────────────────────
+# cuDNN wird i.d.R. über onnxruntime-gpu / ctranslate2 Wheels mitgeliefert.
 
-log "[3/9] Repository vorbereiten..."
-if [ -d "$PROJECT_DIR/.git" ]; then
-    echo "Repository existiert bereits, aktualisiere..."
-    cd "$PROJECT_DIR"
-    git pull --ff-only || warn "git pull fehlgeschlagen (lokale Änderungen?) — fahre mit vorhandenem Stand fort."
+# ── 3. Repository klonen ─────────────────────────────────────────────────
+log "Klone Repository ${REPO_URL} nach ${INSTALL_DIR}..."
+if [[ -d "$INSTALL_DIR/.git" ]]; then
+    log "Repo existiert bereits — führe git pull aus..."
+    git -C "$INSTALL_DIR" pull --ff-only
 else
-    git clone "$REPO_URL" "$PROJECT_DIR"
-    cd "$PROJECT_DIR"
+    git clone "$REPO_URL" "$INSTALL_DIR"
 fi
+cd "$INSTALL_DIR"
 
-if [ ! -f "requirements.txt" ]; then
-    err "requirements.txt nicht gefunden — falsches Repo oder Clone fehlgeschlagen."
-    exit 1
-fi
-
-# ── [4/9] Virtual Environment ────────────────────────────────────────────────
-
-log "[4/9] Virtual Environment einrichten..."
-if [ ! -d ".venv" ]; then
-    python3 -m venv .venv
-fi
+# ── 4. Virtuelle Umgebung erstellen + aktivieren ─────────────────────────
+log "Erstelle Python venv unter ${VENV_DIR}..."
+python3 -m venv "$VENV_DIR"
 # shellcheck disable=SC1091
-source .venv/bin/activate
+source "${VENV_DIR}/bin/activate"
 
-# ── [5/9] Python-Abhängigkeiten ──────────────────────────────────────────────
+log "Aktualisiere pip/setuptools/wheel..."
+pip install --upgrade pip setuptools wheel
 
-log "[5/9] Python-Abhängigkeiten installieren..."
-python -m pip install --upgrade pip wheel setuptools
-
-if [ "$USE_CUDA" -eq 1 ]; then
-    export CMAKE_ARGS="-DGGML_CUDA=ON"
-    export FORCE_CMAKE=1
+# ── 5. requirements.txt installieren (ALLES) ─────────────────────────────
+if [[ -f "${INSTALL_DIR}/requirements.txt" ]]; then
+    REQ_FILE="${INSTALL_DIR}/requirements.txt"
+    log "Nutze requirements.txt aus dem Repository."
 else
-    # Explizit CPU-only bauen, damit kein halbfertiger CUDA-Build versucht wird
-    export CMAKE_ARGS="-DGGML_CUDA=OFF"
-    unset FORCE_CMAKE || true
+    REQ_FILE="${INSTALL_DIR}/requirements.txt"
+    warn "Keine requirements.txt im Repo gefunden — kopiere mitgelieferte Vollversion."
+    cat > "$REQ_FILE" <<'REQEOF'
+Flask==3.0.3
+Werkzeug==3.0.3
+gunicorn==22.0.0
+numpy==1.26.4
+scipy==1.13.1
+faster-whisper==1.0.3
+ctranslate2==4.3.1
+av==12.3.0
+huggingface_hub==0.24.6
+tokenizers==0.19.1
+onnxruntime-gpu==1.18.1
+piper-tts==1.2.0
+piper-phonemize==1.1.0
+onnx==1.16.2
+llama-cpp-python==0.2.90
+requests==2.32.3
+tqdm==4.66.5
+soundfile==0.12.1
+pydub==0.25.1
+python-dotenv==1.0.1
+psutil==6.0.0
+jupyterlab==4.2.5
+notebook==7.2.2
+ipykernel==6.29.5
+ipywidgets==8.1.5
+REQEOF
 fi
 
-pip install -r requirements.txt
-pip install -U "huggingface_hub[cli]"
+log "Installiere alle Python-Pakete aus requirements.txt..."
+pip install -r "$REQ_FILE"
 
-mkdir -p models
+# ── 6. llama-cpp-python explizit MIT CUDA-Support neu bauen ─────────────
+# (Das reine pip-Wheel oben ist meist CPU-only – wir erzwingen hier GPU-Build)
+log "Baue llama-cpp-python mit CUDA (GGML_CUDA) neu..."
+CMAKE_ARGS="-DGGML_CUDA=on" FORCE_CMAKE=1 \
+    pip install --upgrade --force-reinstall --no-cache-dir llama-cpp-python==0.2.90 \
+    || warn "CUDA-Build von llama-cpp-python fehlgeschlagen — Fallback auf CPU-Version aus requirements.txt."
 
-# ── [6/9] Piper (TTS) herunterladen ──────────────────────────────────────────
-
-log "[6/9] Piper TTS-Modell herunterladen..."
-if [ ! -f models/de_DE-thorsten-high.onnx ]; then
-    wget --tries=3 -O models/de_DE-thorsten-high.onnx \
-        https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx
-fi
-if [ ! -f models/de_DE-thorsten-high.onnx.json ]; then
-    wget --tries=3 -O models/de_DE-thorsten-high.onnx.json \
-        https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx.json
-fi
-
-# ── [7/9] Qwen LLM herunterladen ─────────────────────────────────────────────
-
-log "[7/9] Qwen2.5-7B-Instruct (GGUF) herunterladen..."
-if [ ! -f models/Qwen2.5-7B-Instruct-Q4_K_M.gguf ]; then
-    huggingface-cli download \
-        Qwen/Qwen2.5-7B-Instruct-GGUF \
-        Qwen2.5-7B-Instruct-Q4_K_M.gguf \
-        --local-dir models
-
-    # Manche huggingface_hub-Versionen legen die Datei in einem Unterordner ab
-    # statt flach im Zielverzeichnis — hier absichern und ggf. verschieben.
-    if [ ! -f models/Qwen2.5-7B-Instruct-Q4_K_M.gguf ]; then
-        FOUND_FILE=$(find models -name "Qwen2.5-7B-Instruct-Q4_K_M.gguf" -print -quit)
-        if [ -n "$FOUND_FILE" ]; then
-            mv "$FOUND_FILE" models/Qwen2.5-7B-Instruct-Q4_K_M.gguf
-        else
-            err "Qwen-Modell konnte nicht gefunden werden nach dem Download."
-            exit 1
-        fi
-    fi
-fi
-
-# ── [8/9] Cloudflare Tunnel ───────────────────────────────────────────────────
-
-log "[8/9] Cloudflare Tunnel einrichten (Port ${CF_LOCAL_PORT} -> ${CF_HOSTNAME})..."
-
-if ! command -v cloudflared >/dev/null 2>&1; then
-    log "Installiere cloudflared..."
-    ARCH="$(dpkg --print-architecture)"
-    CLOUDFLARED_URL="https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${ARCH}.deb"
-    TMP_DEB="$(mktemp --suffix=.deb)"
-    wget --tries=3 -O "$TMP_DEB" "$CLOUDFLARED_URL"
-    $SUDO dpkg -i "$TMP_DEB" || $SUDO apt-get install -f -y
-    rm -f "$TMP_DEB"
+# ── 7. Cloudflare Tunnel installieren (NICHT starten) ────────────────────
+log "Installiere cloudflared (wird NICHT gestartet)..."
+if ! command -v cloudflared &>/dev/null; then
+    CLOUDFLARED_DEB="/tmp/cloudflared-linux-amd64.deb"
+    ARCH=$(dpkg --print-architecture)
+    wget -q "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${ARCH}.deb" -O "$CLOUDFLARED_DEB"
+    $SUDO dpkg -i "$CLOUDFLARED_DEB" || $SUDO apt-get install -f -y
+    log "cloudflared installiert: $(cloudflared --version || true)"
 else
-    log "cloudflared ist bereits installiert ($(cloudflared --version 2>&1 | head -n1))."
+    log "cloudflared ist bereits installiert."
+fi
+log "Hinweis: Tunnel wurde NICHT gestartet. Starte ihn manuell z.B. mit:"
+log "         cloudflared tunnel --url http://localhost:5000"
+
+# ── 8. Modelle prüfen ─────────────────────────────────────────────────────
+MODELS_DIR="${INSTALL_DIR}/models"
+mkdir -p "$MODELS_DIR"
+if [[ ! -f "${MODELS_DIR}/de_DE-thorsten-high.onnx" ]] || [[ ! -f "${MODELS_DIR}/Qwen2.5-7B-Instruct-Q4_K_M.gguf" ]]; then
+    warn "Modelle (Piper .onnx / Qwen .gguf) nicht in ${MODELS_DIR} gefunden."
+    warn "Bitte lege 'de_DE-thorsten-high.onnx' (+ .onnx.json) und"
+    warn "'Qwen2.5-7B-Instruct-Q4_K_M.gguf' manuell dort ab, bevor der Server startet."
 fi
 
-# Kein systemd verfügbar (z.B. Jupyter/Container-Umgebung) -> Tunnel als
-# einfacher Hintergrundprozess mit nohup, gesteuert über eine PID-Datei.
-CF_PID_FILE="$(pwd)/cloudflared.pid"
-CF_LOG_FILE="$(pwd)/cloudflared.log"
+# ── 9. Server per nohup starten ──────────────────────────────────────────
+log "Starte Server (${SERVER_ENTRY}) im Hintergrund via nohup..."
+cd "$INSTALL_DIR"
+# shellcheck disable=SC1091
+source "${VENV_DIR}/bin/activate"
+nohup python3 "${SERVER_ENTRY}" > "$LOG_FILE" 2>&1 < /dev/null &
+disown
+SERVER_PID=$!
 
-stop_existing_tunnel() {
-    if [ -f "$CF_PID_FILE" ]; then
-        OLD_PID="$(cat "$CF_PID_FILE" 2>/dev/null || true)"
-        if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
-            log "Beende laufenden cloudflared-Prozess (PID $OLD_PID)..."
-            kill "$OLD_PID" 2>/dev/null || true
-            sleep 1
-        fi
-        rm -f "$CF_PID_FILE"
-    fi
-}
-
-if [ -n "$CF_TUNNEL_TOKEN" ]; then
-    # ── Non-interaktiver Weg: Named Tunnel per Token ────────────────────────
-    # Voraussetzung: Der Tunnel wurde bereits im Cloudflare Zero Trust
-    # Dashboard angelegt UND die Public Hostname-Route dort auf
-    # "http://localhost:5000" für app.ducktales.online gesetzt.
-    stop_existing_tunnel
-
-    log "Starte cloudflared im Hintergrund (nohup, kein systemd)..."
-    nohup cloudflared tunnel run --token "$CF_TUNNEL_TOKEN" \
-        > "$CF_LOG_FILE" 2>&1 &
-    NEW_PID=$!
-    disown "$NEW_PID" 2>/dev/null || true
-    echo "$NEW_PID" > "$CF_PID_FILE"
-
-    sleep 2
-    if kill -0 "$NEW_PID" 2>/dev/null; then
-        log "cloudflared läuft im Hintergrund (PID $NEW_PID). Log: $CF_LOG_FILE"
-    else
-        err "cloudflared ist sofort abgestürzt. Prüfe das Log:"
-        tail -n 30 "$CF_LOG_FILE" || true
-        exit 1
-    fi
-
-    log "Stelle sicher, dass im Cloudflare Dashboard unter deinem Tunnel eine"
-    log "Public Hostname-Route existiert: ${CF_HOSTNAME} -> http://localhost:${CF_LOCAL_PORT}"
-    log ""
-    log "Zum späteren Stoppen: kill \$(cat \"$CF_PID_FILE\")"
+sleep 2
+if kill -0 "$SERVER_PID" 2>/dev/null; then
+    log "Server läuft mit PID ${SERVER_PID}. Logs: tail -f ${LOG_FILE}"
 else
-    warn "Keine CF_TUNNEL_TOKEN gesetzt — es kann kein Named Tunnel für"
-    warn "${CF_HOSTNAME} automatisch/nicht-interaktiv eingerichtet werden."
-    warn ""
-    warn "So richtest du es einmalig ein:"
-    warn "  1. https://one.dash.cloudflare.com -> Networks -> Tunnels -> Create a tunnel"
-    warn "  2. Connector-Typ 'cloudflared' wählen, Token kopieren"
-    warn "  3. Public Hostname hinzufügen: ${CF_HOSTNAME} -> http://localhost:${CF_LOCAL_PORT}"
-    warn "  4. Skript erneut ausführen mit:"
-    warn "       export CF_TUNNEL_TOKEN=\"<dein-token>\""
-    warn "       ./install.sh"
-    warn ""
-    warn "Alternativ als schneller Test OHNE eigene Domain (temporäre trycloudflare.com-URL):"
-    warn "  nohup cloudflared tunnel --url http://localhost:${CF_LOCAL_PORT} > cloudflared.log 2>&1 &"
-    warn "  disown"
-    warn ""
-    warn "Fahre trotzdem mit dem lokalen Start von app.py fort (nur über localhost:${CF_LOCAL_PORT} erreichbar)."
+    err "Server scheint nicht gestartet zu sein — prüfe ${LOG_FILE}"
 fi
 
-# ── [9/9] Start ───────────────────────────────────────────────────────────────
-
-log "[9/9] SCP1356AI wird gestartet..."
-exec python app.py
+log "Fertig! Aktiviere das venv künftig manuell mit:"
+log "  source ${VENV_DIR}/bin/activate"
