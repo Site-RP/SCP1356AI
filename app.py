@@ -221,7 +221,7 @@ def ask_ai(player_text: str, tool_results: dict = None) -> dict:
     try:
         result = llm(
             prompt,
-            max_tokens=150,
+            max_tokens=40,
             temperature=0.7,
             top_p=0.9,
             repeat_penalty=1.08,
