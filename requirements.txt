@@ -14,19 +14,22 @@ scipy==1.13.1
 
 # --- Speech-to-Text (Whisper) ---
 faster-whisper==1.0.3
-ctranslate2==4.3.1
+ctranslate2==4.5.0
 av==12.3.0
 huggingface_hub==0.24.6
 tokenizers==0.19.1
-onnxruntime-gpu==1.18.1
+onnxruntime-gpu==1.20.1
 
 # --- Text-to-Speech (Piper) ---
 piper-tts==1.2.0
 piper-phonemize==1.1.0
 onnx==1.16.2
 
-# --- LLM (llama.cpp Bindings, wird separat mit CUDA-Flags gebaut) ---
-llama-cpp-python==0.2.90
+# --- LLM (llama.cpp Bindings, wird separat mit CUDA-Flags für Blackwell/sm_120 gebaut) ---
+llama-cpp-python==0.3.9
+
+# --- cuDNN 9 Python-Fallback (falls apt-Paket cudnn9-cuda-12 nicht verfügbar ist) ---
+nvidia-cudnn-cu12==9.3.0.75
 
 # --- Hilfs- / Systembibliotheken ---
 requests==2.32.3
