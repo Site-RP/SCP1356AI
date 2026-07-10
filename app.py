@@ -4,12 +4,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODELS_DIR = os.path.join(BASE_DIR, "models")
 HF_CACHE_DIR = os.path.join(BASE_DIR, "hf_cache")
 
-# ── CPU-Threads: auf tatsächliche Kernzahl ausrichten statt hart 12 ─────────
-_CPU_COUNT = os.cpu_count() or 12
-os.environ["OMP_NUM_THREADS"] = str(_CPU_COUNT)
-os.environ["MKL_NUM_THREADS"] = str(_CPU_COUNT)
+# ── Basis-Environment (Thread-Zahl wird weiter unten nach der Hardware-
+# Erkennung final gesetzt, hier nur die Pfade/Caches vorbereiten) ───────────
 os.environ["HF_HOME"] = HF_CACHE_DIR
-# Lazy CUDA-Module-Loading verkürzt die Startzeit spürbar (weniger Kernel-JIT beim Import)
+# Lazy CUDA-Module-Loading verkürzt die Startzeit spürbar (weniger Kernel-JIT beim Import,
+# wirkt sich nur aus, falls überhaupt eine GPU vorhanden ist — sonst harmlos ignoriert)
 os.environ.setdefault("CUDA_MODULE_LOADING", "LAZY")
 
 import re
@@ -33,18 +32,139 @@ app = Flask(__name__)
 
 # ── Pfade zu lokalen Modellen ────────────────────────────────────────────────
 TTS_MODEL_PATH = os.path.join(MODELS_DIR, "de_DE-thorsten-high.onnx")
+TTS_CONFIG_PATH = TTS_MODEL_PATH + ".json"
 LLM_MODEL_PATH = os.path.join(MODELS_DIR, "Qwen2.5-7B-Instruct-Q4_K_M.gguf")
 
-# ── GPU-Tuning-Parameter (per ENV überschreibbar) ────────────────────────────
-# Defaults sind für 24GB-Karten (z.B. RTX 4090) ausgelegt: Qwen2.5-7B-Q4 (~4.7GB)
-# + Whisper-small (~1.5GB) lassen selbst bei n_ctx=16384 noch ~15GB VRAM frei.
-# Für 16GB-Karten (z.B. RTX 5060 Ti) setze LLM_N_CTX=8192 LLM_N_BATCH=1024 als ENV.
-LLM_N_CTX = int(os.environ.get("LLM_N_CTX", 16384))
-LLM_N_BATCH = int(os.environ.get("LLM_N_BATCH", 2048))
-LLM_N_UBATCH = int(os.environ.get("LLM_N_UBATCH", 2048))
-LLM_MAX_TOKENS = int(os.environ.get("LLM_MAX_TOKENS", 40))
-STT_COMPUTE_TYPE = os.environ.get("STT_COMPUTE_TYPE", "float16")
-STT_MODEL_SIZE = os.environ.get("STT_MODEL_SIZE", "small")
+# ═══════════════════════════════════════════════════════════════════════════
+# Preflight-Check: fehlende Modell-Dateien VOR dem Laden klar benennen
+#
+# Ohne diesen Check würde man nur eine kryptische Python-Traceback sehen
+# (FileNotFoundError / "Model path does not exist"). Hier wird stattdessen
+# klar aufgelistet, was fehlt und mit welchem Befehl man es nachlädt.
+# Der Server startet trotzdem — TTS/LLM sind dann halt nicht verfügbar,
+# bis die Dateien da sind (bestehendes try/except-Verhalten bleibt).
+# ═══════════════════════════════════════════════════════════════════════════
+
+def check_model_files() -> list:
+    os.makedirs(MODELS_DIR, exist_ok=True)
+    checks = [
+        ("Piper-Stimme (.onnx)", TTS_MODEL_PATH,
+         "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx"),
+        ("Piper-Konfiguration (.onnx.json)", TTS_CONFIG_PATH,
+         "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx.json"),
+        ("LLM GGUF-Modell", LLM_MODEL_PATH,
+         "https://huggingface.co/bartowski/Qwen2.5-7B-Instruct-GGUF/resolve/main/Qwen2.5-7B-Instruct-Q4_K_M.gguf"),
+    ]
+    missing = [(label, path, url) for label, path, url in checks if not os.path.isfile(path)]
+    if missing:
+        print("=" * 60)
+        print("[SETUP] Es fehlen Modell-Dateien — Server startet trotzdem,")
+        print("[SETUP] aber die betroffenen Features sind NICHT verfügbar:")
+        for label, path, url in missing:
+            print(f"[SETUP]   ✗ {label}")
+            print(f"[SETUP]     erwartet unter: {path}")
+            print(f"[SETUP]     Download:  wget -O \"{path}\" \"{url}\"")
+        print("[SETUP] Achtung: Dateinamen sind unter Linux case-sensitive — genau so benennen.")
+        print("=" * 60)
+    return missing
+
+_MISSING_MODELS = check_model_files()
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Hardware-Erkennung
+#
+# Prüft per nvidia-smi, ob überhaupt eine GPU vorhanden ist und wie viel VRAM
+# sie hat. Darauf basierend werden ALLE Modell-Parameter automatisch gewählt:
+# - Keine GPU gefunden → alles läuft komplett auf CPU (Whisper int8, LLM
+#   n_gpu_layers=0, kein flash_attn/offload_kqv, kleinerer Context/Batch).
+# - GPU gefunden → Parameter skalieren mit dem verfügbaren VRAM.
+#
+# Jeder Wert bleibt trotzdem per ENV-Variable überschreibbar (z.B. falls du
+# manuell tunen willst) — die Auto-Erkennung liefert nur die Defaults.
+# ═══════════════════════════════════════════════════════════════════════════
+
+def detect_hardware() -> dict:
+    info = {"has_gpu": False, "gpu_name": None, "vram_mb": 0}
+    try:
+        out = subprocess.run(
+            ["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5,
+        )
+        if out.returncode == 0 and out.stdout.strip():
+            first_line = out.stdout.decode().strip().splitlines()[0]
+            name, mem = [p.strip() for p in first_line.split(",")]
+            info["has_gpu"] = True
+            info["gpu_name"] = name
+            info["vram_mb"] = int(float(mem))
+    except (FileNotFoundError, subprocess.SubprocessError, ValueError, IndexError):
+        pass  # kein nvidia-smi verfügbar / kein Treiber / keine GPU → CPU-Modus
+    return info
+
+_HW = detect_hardware()
+_CPU_COUNT = os.cpu_count() or 12
+
+if _HW["has_gpu"]:
+    vram = _HW["vram_mb"]
+    print(f"[HW] GPU erkannt: {_HW['gpu_name']} ({vram} MB VRAM)")
+    if vram >= 20000:          # z.B. RTX 4090, A100
+        _AUTO_CTX, _AUTO_BATCH, _AUTO_STT_MODEL = 16384, 2048, "medium"
+    elif vram >= 12000:        # z.B. RTX 5060 Ti 16GB, RTX 4070 Ti
+        _AUTO_CTX, _AUTO_BATCH, _AUTO_STT_MODEL = 8192, 1024, "small"
+    elif vram >= 8000:         # z.B. RTX 4060 8GB, RTX 5060 Ti 8GB
+        _AUTO_CTX, _AUTO_BATCH, _AUTO_STT_MODEL = 4096, 512, "small"
+    else:                      # sehr kleine GPUs — sicherheitshalber konservativ
+        _AUTO_CTX, _AUTO_BATCH, _AUTO_STT_MODEL = 2048, 256, "base"
+    _AUTO_DEVICE = "cuda"
+    _AUTO_STT_COMPUTE = "float16"
+    _AUTO_GPU_LAYERS = -1      # alle Layer auf die GPU
+    _AUTO_FLASH_ATTN = True
+    _AUTO_OFFLOAD_KQV = True
+else:
+    print("[HW] Keine GPU erkannt (kein nvidia-smi/Treiber gefunden) — falle auf CPU zurück.")
+    _AUTO_DEVICE = "cpu"
+    _AUTO_STT_COMPUTE = "int8"       # int8 ist auf CPU deutlich schneller als float16
+    _AUTO_STT_MODEL = "small"
+    _AUTO_CTX = 4096                 # kleinerer Context, CPU-Prefill ist langsam
+    _AUTO_BATCH = 256
+    _AUTO_GPU_LAYERS = 0             # 0 = komplett auf CPU
+    _AUTO_FLASH_ATTN = False         # flash_attn ist eine CUDA-Kernel-Optimierung
+    _AUTO_OFFLOAD_KQV = False        # es gibt keine GPU, auf die man offloaden könnte
+
+# ── Modell-Parameter (Auto-Wert als Default, per ENV überschreibbar) ────────
+def _env_int(name, default):
+    val = os.environ.get(name)
+    return int(val) if val is not None else default
+
+def _env_str(name, default):
+    return os.environ.get(name, default)
+
+def _env_bool(name, default):
+    val = os.environ.get(name)
+    if val is None:
+        return default
+    return val.strip().lower() in ("1", "true", "yes", "on")
+
+DEVICE = _env_str("DEVICE", _AUTO_DEVICE)                       # "cuda" oder "cpu"
+LLM_N_CTX = _env_int("LLM_N_CTX", _AUTO_CTX)
+LLM_N_BATCH = _env_int("LLM_N_BATCH", _AUTO_BATCH)
+LLM_N_UBATCH = _env_int("LLM_N_UBATCH", _AUTO_BATCH)
+LLM_MAX_TOKENS = _env_int("LLM_MAX_TOKENS", 40)
+LLM_GPU_LAYERS = _env_int("LLM_GPU_LAYERS", _AUTO_GPU_LAYERS)
+LLM_FLASH_ATTN = _env_bool("LLM_FLASH_ATTN", _AUTO_FLASH_ATTN)
+LLM_OFFLOAD_KQV = _env_bool("LLM_OFFLOAD_KQV", _AUTO_OFFLOAD_KQV)
+STT_COMPUTE_TYPE = _env_str("STT_COMPUTE_TYPE", _AUTO_STT_COMPUTE)
+STT_MODEL_SIZE = _env_str("STT_MODEL_SIZE", _AUTO_STT_MODEL)
+STT_DEVICE = _env_str("STT_DEVICE", DEVICE)
+
+print(f"[HW] Modus: {DEVICE.upper()} | LLM: ctx={LLM_N_CTX} batch={LLM_N_BATCH} "
+      f"gpu_layers={LLM_GPU_LAYERS} flash_attn={LLM_FLASH_ATTN} | "
+      f"STT: model={STT_MODEL_SIZE} compute={STT_COMPUTE_TYPE}")
+
+# CPU-Thread-Umgebungsvariablen erst JETZT setzen (nach der Erkennung, aber vor
+# dem Laden der Modelle) — auf CPU-only-Systemen ist das besonders wichtig,
+# da dort alle Threads für Whisper/LLM/Piper zählen.
+os.environ["OMP_NUM_THREADS"] = str(_CPU_COUNT)
+os.environ["MKL_NUM_THREADS"] = str(_CPU_COUNT)
 
 # ── Global State ────────────────────────────────────────────────────────────
 _tool_registry: dict = {}
@@ -53,20 +173,22 @@ _pending_sessions: dict = {}
 _pending_lock = threading.Lock()
 
 # ── STT ───────────────────────────────────────────────────────────────────────
-print(f"[STT] Lade Whisper ({STT_MODEL_SIZE}, {STT_COMPUTE_TYPE})...")
+print(f"[STT] Lade Whisper ({STT_MODEL_SIZE}, device={STT_DEVICE}, compute={STT_COMPUTE_TYPE})...")
 start_time = time.time()
-stt_model = WhisperModel(
-    STT_MODEL_SIZE,
-    device="cuda",
-    device_index=0,
+_stt_kwargs = dict(
+    device=STT_DEVICE,
     compute_type=STT_COMPUTE_TYPE,
     download_root=HF_CACHE_DIR,
     cpu_threads=_CPU_COUNT,
     num_workers=2,          # überlappt Feature-Extraction (CPU) mit GPU-Decode
 )
+if STT_DEVICE == "cuda":
+    _stt_kwargs["device_index"] = 0
+stt_model = WhisperModel(STT_MODEL_SIZE, **_stt_kwargs)
 print(f"[STT] Whisper bereit in {time.time() - start_time:.2f}s")
 
 # ── TTS ───────────────────────────────────────────────────────────────────────
+# (Piper läuft ohnehin CPU-basiert, keine Hardware-Umschaltung nötig)
 print("[TTS] Lade Piper TTS...")
 start_time = time.time()
 try:
@@ -79,20 +201,21 @@ except Exception as e:
     tts_voice = None
 
 # ── LLM ───────────────────────────────────────────────────────────────────────
-print(f"[AI] Lade LLM (n_ctx={LLM_N_CTX}, n_batch={LLM_N_BATCH})...")
+print(f"[AI] Lade LLM (n_ctx={LLM_N_CTX}, n_batch={LLM_N_BATCH}, gpu_layers={LLM_GPU_LAYERS})...")
 start_time = time.time()
 try:
     _llm_kwargs = dict(
         model_path=LLM_MODEL_PATH,
         n_ctx=LLM_N_CTX,
-        n_gpu_layers=-1,        # alle Layer auf die GPU
+        n_gpu_layers=LLM_GPU_LAYERS,   # -1 = alle Layer auf GPU, 0 = komplett CPU
         n_batch=LLM_N_BATCH,
-        flash_attn=True,        # nutzt Tensor Cores, Blackwell profitiert stark davon
+        flash_attn=LLM_FLASH_ATTN,     # nur auf GPU sinnvoll/unterstützt
         n_threads=_CPU_COUNT,
-        main_gpu=0,
-        offload_kqv=True,       # KV-Cache ebenfalls auf GPU statt RAM
+        offload_kqv=LLM_OFFLOAD_KQV,
         verbose=False,
     )
+    if DEVICE == "cuda":
+        _llm_kwargs["main_gpu"] = 0
     try:
         # n_ubatch ist nicht in jeder llama-cpp-python Version verfügbar
         llm = Llama(n_ubatch=LLM_N_UBATCH, **_llm_kwargs)
@@ -309,8 +432,17 @@ def synthesize_speech(text: str) -> np.ndarray:
         with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as tmp_file:
             temp_path = tmp_file.name
 
-        with open(temp_path, 'wb') as f:
-            tts_voice.synthesize(text, f)
+        with wave.open(temp_path, 'wb') as wav_file:
+            # piper-tts >= 1.2.0 (piper1-gpl-Rewrite): synthesize() liefert nur noch
+            # einen Generator von AudioChunk-Objekten zurück (für Streaming) und
+            # erwartet KEIN File-Objekt mehr als zweiten Parameter. Zum direkten
+            # Schreiben einer WAV-Datei gibt es stattdessen synthesize_wav(), das
+            # ein offenes wave.Wave_write-Objekt braucht (nicht ein rohes File-Handle).
+            if hasattr(tts_voice, "synthesize_wav"):
+                tts_voice.synthesize_wav(text, wav_file)
+            else:
+                # Fallback für ältere piper-tts-Versionen (<1.2.0) mit der alten API
+                tts_voice.synthesize(text, wav_file)
 
         with wave.open(temp_path, 'rb') as wav_file:
             n_frames = wav_file.getnframes()
@@ -726,8 +858,11 @@ def register_tools():
 def health():
     return jsonify({
         "status": "ok",
+        "hardware_mode": DEVICE,
+        "gpu_detected": _HW["has_gpu"],
         "tts_available": tts_voice is not None,
         "llm_available": llm is not None,
+        "missing_model_files": [path for _, path, _ in _MISSING_MODELS],
         "tools_count": len(_tool_registry),
         "registered_tools": list(_tool_registry.keys()),
         "pending_sessions": len(_pending_sessions),
@@ -737,14 +872,18 @@ def health():
 
 @app.route("/gpu_status", methods=["GET"])
 def gpu_status():
-    """Roher nvidia-smi Output zur schnellen Sichtprüfung der GPU-Auslastung/VRAM."""
+    """Roher nvidia-smi Output zur schnellen Sichtprüfung der GPU-Auslastung/VRAM.
+    Läuft der Server im CPU-Modus, gibt es hier bewusst keinen Fehler, sondern
+    einen klaren Hinweis, statt einen 500er zu werfen."""
+    if not _HW["has_gpu"]:
+        return jsonify({"mode": "cpu", "message": "Keine GPU erkannt — Server läuft im CPU-Modus."})
     try:
         out = subprocess.run(
             ["nvidia-smi", "--query-gpu=name,utilization.gpu,memory.used,memory.total,temperature.gpu",
              "--format=csv,noheader"],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5, check=True,
         )
-        return jsonify({"gpu": out.stdout.decode().strip()})
+        return jsonify({"mode": "cuda", "gpu": out.stdout.decode().strip()})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -761,9 +900,17 @@ def debug_info():
         "tool_results_count": len(_tool_results),
         "tool_results_keys": list(_tool_results.keys()),
         "pending_sessions": list(_pending_sessions.keys()),
+        "hardware_mode": DEVICE,
+        "gpu_detected": _HW["has_gpu"],
+        "gpu_name": _HW["gpu_name"],
+        "gpu_vram_mb": _HW["vram_mb"],
         "llm_n_ctx": LLM_N_CTX,
         "llm_n_batch": LLM_N_BATCH,
+        "llm_gpu_layers": LLM_GPU_LAYERS,
+        "llm_flash_attn": LLM_FLASH_ATTN,
+        "stt_model_size": STT_MODEL_SIZE,
         "stt_compute_type": STT_COMPUTE_TYPE,
+        "stt_device": STT_DEVICE,
         "cpu_threads": _CPU_COUNT,
     })
 
@@ -772,10 +919,12 @@ if __name__ == "__main__":
     print("=" * 60)
     print("SCP-1356 Server startet...")
     print("=" * 60)
+    print(f"[START] Modus: {DEVICE.upper()}"
+          + (f" ({_HW['gpu_name']}, {_HW['vram_mb']} MB VRAM)" if _HW["has_gpu"] else " (keine GPU gefunden)"))
     print(f"[START] TTS Voice: {'Verfügbar' if tts_voice is not None else 'NICHT VERFÜGBAR'}")
     print(f"[START] LLM: {'Verfügbar' if llm is not None else 'NICHT VERFÜGBAR'}")
-    print(f"[START] LLM n_ctx={LLM_N_CTX} n_batch={LLM_N_BATCH} n_ubatch={LLM_N_UBATCH}")
-    print(f"[START] STT compute_type={STT_COMPUTE_TYPE}")
+    print(f"[START] LLM n_ctx={LLM_N_CTX} n_batch={LLM_N_BATCH} n_ubatch={LLM_N_UBATCH} gpu_layers={LLM_GPU_LAYERS}")
+    print(f"[START] STT model={STT_MODEL_SIZE} device={STT_DEVICE} compute_type={STT_COMPUTE_TYPE}")
 
     _warmup()
 
