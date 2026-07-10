@@ -4,13 +4,16 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODELS_DIR = os.path.join(BASE_DIR, "models")
 HF_CACHE_DIR = os.path.join(BASE_DIR, "hf_cache")
 
-os.environ["OMP_NUM_THREADS"] = "12"
-os.environ["MKL_NUM_THREADS"] = "12"
+# ── CPU-Threads: auf tatsächliche Kernzahl ausrichten statt hart 12 ─────────
+_CPU_COUNT = os.cpu_count() or 12
+os.environ["OMP_NUM_THREADS"] = str(_CPU_COUNT)
+os.environ["MKL_NUM_THREADS"] = str(_CPU_COUNT)
 os.environ["HF_HOME"] = HF_CACHE_DIR
+# Lazy CUDA-Module-Loading verkürzt die Startzeit spürbar (weniger Kernel-JIT beim Import)
+os.environ.setdefault("CUDA_MODULE_LOADING", "LAZY")
 
 import re
 import json
-import io
 import wave
 import numpy as np
 from flask import Flask, request, jsonify
@@ -24,6 +27,7 @@ import tempfile
 import subprocess
 import threading
 import queue
+import uuid
 
 app = Flask(__name__)
 
@@ -31,22 +35,33 @@ app = Flask(__name__)
 TTS_MODEL_PATH = os.path.join(MODELS_DIR, "de_DE-thorsten-high.onnx")
 LLM_MODEL_PATH = os.path.join(MODELS_DIR, "Qwen2.5-7B-Instruct-Q4_K_M.gguf")
 
+# ── GPU-Tuning-Parameter (per ENV überschreibbar) ────────────────────────────
+# RTX 5060 Ti hat 16GB VRAM — für Qwen2.5-7B-Q4 (~4.7GB) + Whisper-small (~1.5GB)
+# ist reichlich Platz für einen deutlich größeren Context und größere Batches.
+LLM_N_CTX = int(os.environ.get("LLM_N_CTX", 8192))
+LLM_N_BATCH = int(os.environ.get("LLM_N_BATCH", 1024))
+LLM_N_UBATCH = int(os.environ.get("LLM_N_UBATCH", 1024))
+LLM_MAX_TOKENS = int(os.environ.get("LLM_MAX_TOKENS", 40))
+STT_COMPUTE_TYPE = os.environ.get("STT_COMPUTE_TYPE", "float16")
+STT_MODEL_SIZE = os.environ.get("STT_MODEL_SIZE", "small")
+
 # ── Global State ────────────────────────────────────────────────────────────
 _tool_registry: dict = {}
 _tool_results: dict = {}
-
-# Speichert den Kontext eines laufenden Gesprächs, das auf Tool-Ergebnisse wartet
-# Key: session_id (z.B. SteamID des Spielers), Value: dict mit original_text
 _pending_sessions: dict = {}
+_pending_lock = threading.Lock()
 
 # ── STT ───────────────────────────────────────────────────────────────────────
-print("[STT] Lade Whisper...")
+print(f"[STT] Lade Whisper ({STT_MODEL_SIZE}, {STT_COMPUTE_TYPE})...")
 start_time = time.time()
 stt_model = WhisperModel(
-    "small",
+    STT_MODEL_SIZE,
     device="cuda",
-    compute_type="float16",
+    device_index=0,
+    compute_type=STT_COMPUTE_TYPE,
     download_root=HF_CACHE_DIR,
+    cpu_threads=_CPU_COUNT,
+    num_workers=2,          # überlappt Feature-Extraction (CPU) mit GPU-Decode
 )
 print(f"[STT] Whisper bereit in {time.time() - start_time:.2f}s")
 
@@ -63,23 +78,49 @@ except Exception as e:
     tts_voice = None
 
 # ── LLM ───────────────────────────────────────────────────────────────────────
-print("[AI] Lade LLM...")
+print(f"[AI] Lade LLM (n_ctx={LLM_N_CTX}, n_batch={LLM_N_BATCH})...")
 start_time = time.time()
 try:
-    llm = Llama(
+    _llm_kwargs = dict(
         model_path=LLM_MODEL_PATH,
-        n_ctx=4096,
-        n_gpu_layers=-1,
-        n_batch=512,
-        flash_attn=True,
-        n_threads=12,
+        n_ctx=LLM_N_CTX,
+        n_gpu_layers=-1,        # alle Layer auf die GPU
+        n_batch=LLM_N_BATCH,
+        flash_attn=True,        # nutzt Tensor Cores, Blackwell profitiert stark davon
+        n_threads=_CPU_COUNT,
+        main_gpu=0,
+        offload_kqv=True,       # KV-Cache ebenfalls auf GPU statt RAM
         verbose=False,
     )
+    try:
+        # n_ubatch ist nicht in jeder llama-cpp-python Version verfügbar
+        llm = Llama(n_ubatch=LLM_N_UBATCH, **_llm_kwargs)
+    except TypeError:
+        print("[AI] n_ubatch wird von dieser llama-cpp-python Version nicht unterstützt, ignoriere.")
+        llm = Llama(**_llm_kwargs)
     print(f"[AI] LLM bereit in {time.time() - start_time:.2f}s")
 except Exception as e:
-    import traceback
     traceback.print_exc()
     llm = None
+
+# ── GPU-Warmup ────────────────────────────────────────────────────────────────
+# Erste echte CUDA-Aufrufe (Kernel-Kompilierung/-Cache) sind spürbar langsamer.
+# Das hier vorziehen, damit der erste Spieler-Request nicht die "kalte" Latenz zahlt.
+def _warmup():
+    try:
+        if stt_model is not None:
+            print("[WARMUP] Whisper...")
+            silence = np.zeros(16000, dtype=np.float32)  # 1s Stille
+            list(stt_model.transcribe(silence, language="de", beam_size=1)[0])
+        if llm is not None:
+            print("[WARMUP] LLM...")
+            llm("<|system|>\nHallo<|end|>\n<|user|>\nHallo<|end|>\n<|assistant|>\n", max_tokens=4, echo=False)
+        if tts_voice is not None:
+            print("[WARMUP] Piper...")
+            synthesize_speech("Warmup.")
+        print("[WARMUP] Fertig — GPU-Kernel sind vorkompiliert.")
+    except Exception as e:
+        print(f"[WARMUP] Fehler (nicht kritisch): {e}")
 
 # ── System Prompt ─────────────────────────────────────────────────────────────
 
@@ -157,10 +198,7 @@ Antwort:
 """
 
 def build_system_prompt() -> str:
-    print(f"[PROMPT] Erstelle System-Prompt mit {len(_tool_registry)} Tools")
-
     if not _tool_registry:
-        print("[PROMPT] Keine Tools registriert")
         return SYSTEM_PROMPT_BASE
 
     tool_lines = ["Verfügbare Tools:"]
@@ -169,7 +207,6 @@ def build_system_prompt() -> str:
             f"{p['name']}: {p['type']}" for p in info.get("params", [])
         )
         tool_lines.append(f"- {name}({params}): {info.get('description', '')}")
-        print(f"[PROMPT] Tool: {name} mit Parametern: {params}")
 
     return SYSTEM_PROMPT_BASE + "\n" + "\n".join(tool_lines)
 
@@ -183,19 +220,15 @@ def repair_json(json_str: str) -> str:
     return json_str
 
 def ask_ai(player_text: str, tool_results: dict = None) -> dict:
-    """Erster LLM-Aufruf oder zweiter mit Tool-Ergebnissen."""
-    print(f"[AI] Starte Anfrage: {player_text!r}")
-    print(f"[AI] Tool-Ergebnisse vorhanden: {tool_results is not None and len(tool_results) > 0}")
-
+    """Erster LLM-Aufruf oder zweiter mit Tool-Ergebnissen.
+    WICHTIG: Wird ausschließlich vom Worker-Thread aufgerufen (siehe unten),
+    damit niemals zwei Threads gleichzeitig llm(...) aufrufen."""
     if llm is None:
-        print("[AI] LLM nicht verfügbar")
         return {"speech": "Entschuldigung, aber meine Gedanken sind gerade... woanders.", "actions": []}
 
     system = build_system_prompt()
 
     if tool_results:
-        # Zweiter Schritt: Mit Tool-Ergebnissen
-        # Wir instruieren das Modell explizit, KEINE weiteren Tools aufzurufen
         tool_section = "\n\nDu hast folgende Informationen erhalten:\n"
         for tool_name, result in tool_results.items():
             tool_section += f"\n[{tool_name}]:\n{result}\n"
@@ -203,25 +236,20 @@ def ask_ai(player_text: str, tool_results: dict = None) -> dict:
             "\nBeantworte nun die Frage des Spielers mit diesen Informationen. "
             "Rufe KEINE weiteren Tools auf. Setze 'actions' auf []."
         )
-
-        # Simuliere einen Gesprächsverlauf: user → assistant (tool call) → tool results → final answer
         prompt = (
             f"<|system|>\n{system}<|end|>\n"
             f"<|user|>\n{player_text}<|end|>\n"
             f"<|assistant|>\n{tool_section}\n"
             f"<|assistant|>\n"
         )
-        print(f"[AI] Prompt-Länge (2. Schritt): {len(prompt)} Zeichen")
     else:
-        # Erster Schritt: Normale Anfrage
         prompt = f"<|system|>\n{system}<|end|>\n<|user|>\n{player_text}<|end|>\n<|assistant|>\n"
-        print(f"[AI] Prompt-Länge (1. Schritt): {len(prompt)} Zeichen")
 
     start_time = time.time()
     try:
         result = llm(
             prompt,
-            max_tokens=40,
+            max_tokens=LLM_MAX_TOKENS,
             temperature=0.7,
             top_p=0.9,
             repeat_penalty=1.08,
@@ -236,11 +264,9 @@ def ask_ai(player_text: str, tool_results: dict = None) -> dict:
         return {"speech": "Meine Gedanken sind... zersplittert.", "actions": []}
 
     raw = result["choices"][0]["text"].strip()
-    print(f"[AI] Raw output: {raw!r}")
 
     match = re.search(r'\{.*\}', raw, re.DOTALL)
     if not match:
-        print(f"[AI] KEIN JSON gefunden — nutze raw als speech")
         speech_text = raw[:120] if raw else "Ich... ich kann nicht sprechen."
         return {"speech": speech_text, "actions": []}
 
@@ -248,14 +274,11 @@ def ask_ai(player_text: str, tool_results: dict = None) -> dict:
 
     try:
         parsed = json.loads(json_str)
-    except json.JSONDecodeError as e:
-        print(f"[AI] JSON-Fehler: {e}, versuche zu reparieren...")
+    except json.JSONDecodeError:
         try:
             repaired = repair_json(json_str)
-            print(f"[AI] Repariertes JSON: {repaired!r}")
             parsed = json.loads(repaired)
-        except json.JSONDecodeError as e2:
-            print(f"[AI] Reparatur fehlgeschlagen: {e2}")
+        except json.JSONDecodeError:
             speech_match = re.search(r'"speech"\s*:\s*"([^"]*)"', json_str)
             if speech_match:
                 return {"speech": speech_match.group(1), "actions": []}
@@ -265,10 +288,7 @@ def ask_ai(player_text: str, tool_results: dict = None) -> dict:
     actions = parsed.get('actions', [])
 
     if not isinstance(actions, list):
-        print(f"[AI] actions ist kein Array: {actions}")
         actions = []
-
-    print(f"[AI] speech: {speech!r}, actions: {actions}")
 
     if not speech:
         parsed['speech'] = "Ich... ich kann nicht sprechen."
@@ -277,14 +297,10 @@ def ask_ai(player_text: str, tool_results: dict = None) -> dict:
 
 def synthesize_speech(text: str) -> np.ndarray:
     """Synthetisiert Sprache mit Piper TTS 1.4.2 und gibt PCM als float32 Array zurück."""
-    print(f"[TTS] Synthetisiere: {text!r}")
-
     if tts_voice is None:
-        print(f"[TTS] TTS nicht verfügbar!")
         return np.array([], dtype=np.float32)
 
     if not text or text.strip() == "":
-        print(f"[TTS] Text ist leer")
         return np.array([], dtype=np.float32)
 
     temp_path = None
@@ -302,10 +318,7 @@ def synthesize_speech(text: str) -> np.ndarray:
             samp_width = wav_file.getsampwidth()
             frames = wav_file.readframes(n_frames)
 
-            print(f"[TTS] WAV: {n_frames} frames, {sample_rate}Hz, {n_channels} Kanäle, {samp_width} bytes/Sample")
-
             if n_frames == 0:
-                print("[TTS] WARNING: Keine Audio-Daten erzeugt!")
                 return np.array([], dtype=np.float32)
 
         if samp_width == 2:
@@ -313,7 +326,6 @@ def synthesize_speech(text: str) -> np.ndarray:
         elif samp_width == 1:
             pcm = np.frombuffer(frames, dtype=np.uint8).astype(np.float32) / 128.0 - 1.0
         else:
-            print(f"[TTS] Nicht unterstützte Sample-Breite: {samp_width}")
             return np.array([], dtype=np.float32)
 
         if n_channels > 1:
@@ -327,14 +339,12 @@ def synthesize_speech(text: str) -> np.ndarray:
             g = gcd(48000, sample_rate)
             up = 48000 // g
             down = sample_rate // g
-            print(f"[TTS] Resample von {sample_rate}Hz auf 48000Hz")
             pcm = resample_poly(pcm, up=up, down=down).astype(np.float32)
 
         max_val = np.max(np.abs(pcm))
         if max_val > 0:
             pcm = pcm / max_val * 0.90
 
-        print(f"[TTS] Final: {len(pcm)} samples @48kHz")
         return pcm
 
     except Exception as e:
@@ -350,7 +360,7 @@ def synthesize_speech(text: str) -> np.ndarray:
         if temp_path and os.path.exists(temp_path):
             try:
                 os.unlink(temp_path)
-            except:
+            except Exception:
                 pass
 
 def synthesize_speech_fallback(text: str) -> np.ndarray:
@@ -359,11 +369,7 @@ def synthesize_speech_fallback(text: str) -> np.ndarray:
 
     try:
         subprocess.run(
-            [
-                "piper",
-                "--model", TTS_MODEL_PATH,
-                "--output_file", output_path,
-            ],
+            ["piper", "--model", TTS_MODEL_PATH, "--output_file", output_path],
             input=(text + "\n").encode("utf-8"),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -392,7 +398,6 @@ def synthesize_speech_fallback(text: str) -> np.ndarray:
             os.unlink(output_path)
 
 def build_tts_response(speech_text: str, actions: list) -> dict:
-    """Hilfsfunktion: TTS generieren und fertiges Response-Dict bauen."""
     audio_samples = []
     if speech_text and speech_text.strip():
         try:
@@ -411,117 +416,143 @@ def build_tts_response(speech_text: str, actions: list) -> dict:
 # ── Konstanten für Info-Tools ─────────────────────────────────────────────────
 INFO_TOOLS = {"GetEvents", "GetStatus", "GetRoom", "GetPlayerCount", "GetPlayersInRange", "GetAllPlayers"}
 
+# ═══════════════════════════════════════════════════════════════════════════
+# GPU-Worker-Queue
+#
+# Warum: llama-cpp-python und faster-whisper sind NICHT dafür gebaut, dass
+# mehrere Threads gleichzeitig auf demselben Modell-Objekt Inferenz fahren.
+# Paralleler Zugriff führt zu Crashes/korrupten Ergebnissen oder VRAM-Fehlern.
+#
+# Lösung: Flask läuft mit threaded=True und nimmt beliebig viele Requests
+# gleichzeitig an (Netzwerk-I/O, JSON-Parsing etc. läuft parallel). Die
+# eigentliche GPU-Arbeit (STT/LLM/TTS) wird aber über eine Queue an GENAU
+# EINEN Worker-Thread weitergereicht, der die GPU permanent beschäftigt hält
+# (kein Leerlauf zwischen Requests) statt sie durch Locking/Blocking
+# auszubremsen. Das maximiert den GPU-Durchsatz bei mehreren Spielern.
+# ═══════════════════════════════════════════════════════════════════════════
+
+_gpu_queue: "queue.Queue[dict]" = queue.Queue()
+
+def _gpu_worker():
+    while True:
+        job = _gpu_queue.get()
+        try:
+            job["fn"](job)
+        except Exception as e:
+            print(f"[WORKER] Unerwarteter Fehler: {e}")
+            print(traceback.format_exc())
+            job["result"] = {"error": str(e)}
+        finally:
+            job["event"].set()
+            _gpu_queue.task_done()
+
+_worker_thread = threading.Thread(target=_gpu_worker, daemon=True)
+_worker_thread.start()
+
+def submit_gpu_job(fn, timeout=60.0):
+    """Reicht eine Funktion an den GPU-Worker weiter und wartet auf das Ergebnis."""
+    event = threading.Event()
+    job = {"fn": fn, "event": event, "result": None}
+    _gpu_queue.put(job)
+    finished = event.wait(timeout=timeout)
+    if not finished:
+        return {"error": "GPU-Worker Timeout — Server überlastet"}
+    return job["result"]
+
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.route("/transcribe", methods=["POST"])
 def transcribe():
-    print(f"[REQUEST] Transcribe-Anfrage erhalten")
     start_time_total = time.time()
-
     raw = request.data
-    print(f"[REQUEST] Daten-Länge: {len(raw)} Bytes")
 
     if not raw:
         return jsonify({"text": "", "response": "", "actions": [], "audio": []})
 
-    # ── Audio-Konvertierung ───────────────────────────────────────────────────
     try:
         pcm_48k = np.frombuffer(raw, dtype=np.float32).copy()
         pcm_16k = resample_poly(pcm_48k, up=1, down=3).astype(np.float32)
-        print(f"[AUDIO] {len(pcm_16k)/16000:.2f}s Audio empfangen")
     except Exception as e:
         print(f"[AUDIO] FEHLER: {e}")
         return jsonify({"text": "", "response": "", "actions": [], "audio": []})
 
     if len(pcm_16k) < 16000 * 0.3:
-        print(f"[AUDIO] Zu kurz")
         return jsonify({"text": "", "response": "", "actions": [], "audio": []})
 
-    # ── STT ──────────────────────────────────────────────────────────────────
-    try:
-        segments, info = stt_model.transcribe(
-            pcm_16k,
-            language="de",
-            beam_size=1,
-            vad_filter=True,
-            vad_parameters=dict(min_silence_duration_ms=180, speech_pad_ms=80),
-        )
-    except Exception as e:
-        print(f"[STT] FEHLER: {e}")
-        return jsonify({"text": "", "response": "", "actions": [], "audio": []})
+    def job_fn(job):
+        # ── STT ──────────────────────────────────────────────────────────
+        try:
+            segments, info = stt_model.transcribe(
+                pcm_16k,
+                language="de",
+                beam_size=1,
+                vad_filter=True,
+                vad_parameters=dict(min_silence_duration_ms=180, speech_pad_ms=80),
+            )
+            text = " ".join(s.text for s in segments).strip()
+        except Exception as e:
+            print(f"[STT] FEHLER: {e}")
+            job["result"] = {"text": "", "response": "", "actions": [], "audio": []}
+            return
 
-    text = " ".join(s.text for s in segments).strip()
-    print(f"[STT] Erkannt: {text!r}")
+        if not text:
+            job["result"] = {"text": "", "response": "", "actions": [], "audio": []}
+            return
 
-    if not text:
-        return jsonify({"text": "", "response": "", "actions": [], "audio": []})
+        # ── Erster AI-Schritt ────────────────────────────────────────────
+        try:
+            ai_result = ask_ai(text)
+            speech_text = ai_result.get("speech", "")
+            actions = ai_result.get("actions", [])
+        except Exception as e:
+            print(f"[AI] FEHLER: {e}")
+            print(traceback.format_exc())
+            speech_text = "Meine Gedanken sind... zersplittert."
+            actions = []
 
-    # ── Erster AI-Schritt ─────────────────────────────────────────────────────
-    try:
-        ai_result = ask_ai(text)
-        speech_text = ai_result.get("speech", "")
-        actions = ai_result.get("actions", [])
-        print(f"[AI] Erster Schritt: speech={speech_text!r}, actions={actions}")
-    except Exception as e:
-        print(f"[AI] FEHLER: {e}")
-        print(traceback.format_exc())
-        speech_text = "Meine Gedanken sind... zersplittert."
-        actions = []
+        info_tool_names = [a.get("tool") for a in actions if a.get("tool") in INFO_TOOLS]
 
-    # ── Prüfe ob Info-Tools dabei sind ───────────────────────────────────────
-    info_tool_names = [a.get("tool") for a in actions if a.get("tool") in INFO_TOOLS]
+        if info_tool_names:
+            session_id = uuid.uuid4().hex
+            with _pending_lock:
+                _pending_sessions[session_id] = {
+                    "original_text": text,
+                    "expected_tools": set(info_tool_names),
+                    "received_tools": set(),
+                    "tool_results": {},
+                }
 
-    if info_tool_names:
-        # Speichere Kontext für den Follow-up
-        # Wir verwenden den Text als Key (simpel; bei Mehrspieler: SteamID nutzen)
-        session_id = str(hash(text + str(time.time())))
-        _pending_sessions[session_id] = {
-            "original_text": text,
-            "expected_tools": set(info_tool_names),
-            "received_tools": set(),
-            "tool_results": {},
-        }
-        print(f"[SESSION] Neue Session {session_id} wartet auf: {info_tool_names}")
+            between_audio = []
+            if speech_text:
+                try:
+                    pcm = synthesize_speech(speech_text)
+                    if len(pcm) > 0:
+                        between_audio = pcm.tolist()
+                except Exception as e:
+                    print(f"[TTS] FEHLER bei Zwischen-Antwort: {e}")
 
-        # Zwischen-Antwort als Audio synthetisieren (z.B. "Ich durchsuche meine Gedanken...")
-        # C# spielt das direkt ab; die finale Antwort kommt später via /followup
-        between_audio = []
-        if speech_text:
-            try:
-                pcm = synthesize_speech(speech_text)
-                if len(pcm) > 0:
-                    between_audio = pcm.tolist()
-            except Exception as e:
-                print(f"[TTS] FEHLER bei Zwischen-Antwort: {e}")
+            job["result"] = {
+                "text": text,
+                "response": speech_text,
+                "actions": actions,
+                "audio": between_audio,
+                "session_id": session_id,
+                "awaiting_tools": True,
+            }
+        else:
+            response = build_tts_response(speech_text, actions)
+            response["text"] = text
+            response["awaiting_tools"] = False
+            job["result"] = response
 
-        print(f"[REQUEST] Fertig in {time.time() - start_time_total:.2f}s (wartet auf Tool-Ergebnisse)")
-        return jsonify({
-            "text": text,
-            "response": speech_text,       # C# kann das optional anzeigen
-            "actions": actions,
-            "audio": between_audio,        # Zwischen-Antwort — finales Audio kommt via /followup
-            "session_id": session_id,      # C# muss das mitspeichern und bei /followup mitschicken
-            "awaiting_tools": True,        # Hinweis für C#: bitte /followup aufrufen
-        })
-    else:
-        # Keine Info-Tools → direkt antworten
-        response = build_tts_response(speech_text, actions)
-        response["text"] = text
-        response["awaiting_tools"] = False
-        print(f"[REQUEST] Fertig in {time.time() - start_time_total:.2f}s")
-        return jsonify(response)
+    result = submit_gpu_job(job_fn)
+    print(f"[REQUEST] /transcribe fertig in {time.time() - start_time_total:.2f}s")
+    return jsonify(result)
 
 
 @app.route("/tts", methods=["POST"])
 def tts_only():
-    """
-    Reine TTS-Route ohne LLM — synthetisiert den gegebenen Text direkt.
-    Body (JSON): { "text": "..." }
-    Genutzt z.B. von C# Speak()/scp1356 speak <text>.
-    """
-    print("[REQUEST] TTS-only Anfrage erhalten")
-    start_time = time.time()
-
+    """Reine TTS-Route ohne LLM."""
     try:
         data = request.get_json(force=True) or {}
     except Exception as e:
@@ -531,31 +562,24 @@ def tts_only():
     if not text:
         return jsonify({"text": "", "audio": []})
 
-    print(f"[TTS-ONLY] Text: {text!r}")
+    def job_fn(job):
+        audio_samples = []
+        try:
+            pcm = synthesize_speech(text)
+            if len(pcm) > 0:
+                audio_samples = pcm.tolist()
+        except Exception as e:
+            print(f"[TTS-ONLY] FEHLER: {e}")
+        job["result"] = {"text": text, "audio": audio_samples}
 
-    audio_samples = []
-    try:
-        pcm = synthesize_speech(text)
-        if len(pcm) > 0:
-            audio_samples = pcm.tolist()
-    except Exception as e:
-        print(f"[TTS-ONLY] FEHLER: {e}")
-        print(traceback.format_exc())
-
-    print(f"[TTS-ONLY] Fertig in {time.time() - start_time:.2f}s")
-    return jsonify({"text": text, "audio": audio_samples})
+    result = submit_gpu_job(job_fn)
+    return jsonify(result)
 
 
 @app.route("/prompt", methods=["POST"])
 def prompt():
-    """
-    Nimmt direkten Text entgegen (kein Audio/STT), z.B. von C# SendPrompt().
-    Body (JSON): { "text": "..." }
-    Verhält sich identisch zu /transcribe ab dem AI-Schritt.
-    """
-    print("[REQUEST] Prompt-Anfrage erhalten")
+    """Nimmt direkten Text entgegen (kein Audio/STT)."""
     start_time_total = time.time()
-
     try:
         data = request.get_json(force=True) or {}
     except Exception as e:
@@ -565,135 +589,99 @@ def prompt():
     if not text:
         return jsonify({"text": "", "response": "", "actions": [], "audio": []})
 
-    print(f"[PROMPT] Text: {text!r}")
+    def job_fn(job):
+        try:
+            ai_result = ask_ai(text)
+            speech_text = ai_result.get("speech", "")
+            actions = ai_result.get("actions", [])
+        except Exception as e:
+            print(f"[AI] FEHLER: {e}")
+            print(traceback.format_exc())
+            speech_text = "Meine Gedanken sind... zersplittert."
+            actions = []
 
-    # ── Erster AI-Schritt ─────────────────────────────────────────────────────
-    try:
-        ai_result = ask_ai(text)
-        speech_text = ai_result.get("speech", "")
-        actions = ai_result.get("actions", [])
-        print(f"[AI] Erster Schritt: speech={speech_text!r}, actions={actions}")
-    except Exception as e:
-        print(f"[AI] FEHLER: {e}")
-        print(traceback.format_exc())
-        speech_text = "Meine Gedanken sind... zersplittert."
-        actions = []
+        info_tool_names = [a.get("tool") for a in actions if a.get("tool") in INFO_TOOLS]
 
-    info_tool_names = [a.get("tool") for a in actions if a.get("tool") in INFO_TOOLS]
+        if info_tool_names:
+            session_id = uuid.uuid4().hex
+            with _pending_lock:
+                _pending_sessions[session_id] = {
+                    "original_text": text,
+                    "expected_tools": set(info_tool_names),
+                    "received_tools": set(),
+                    "tool_results": {},
+                }
 
-    if info_tool_names:
-        session_id = str(hash(text + str(time.time())))
-        _pending_sessions[session_id] = {
-            "original_text": text,
-            "expected_tools": set(info_tool_names),
-            "received_tools": set(),
-            "tool_results": {},
-        }
-        print(f"[SESSION] Neue Session {session_id} wartet auf: {info_tool_names}")
+            between_audio = []
+            if speech_text:
+                try:
+                    pcm = synthesize_speech(speech_text)
+                    if len(pcm) > 0:
+                        between_audio = pcm.tolist()
+                except Exception:
+                    pass
 
-        between_audio = []
-        if speech_text:
-            try:
-                pcm = synthesize_speech(speech_text)
-                if len(pcm) > 0:
-                    between_audio = pcm.tolist()
-            except Exception:
-                pass
+            job["result"] = {
+                "text": text,
+                "response": speech_text,
+                "actions": actions,
+                "audio": between_audio,
+                "session_id": session_id,
+                "awaiting_tools": True,
+            }
+        else:
+            response = build_tts_response(speech_text, actions)
+            response["text"] = text
+            response["awaiting_tools"] = False
+            job["result"] = response
 
-        print(f"[REQUEST] Fertig in {time.time() - start_time_total:.2f}s (awaiting_tools)")
-        return jsonify({
-            "text": text,
-            "response": speech_text,
-            "actions": actions,
-            "audio": between_audio,
-            "session_id": session_id,
-            "awaiting_tools": True,
-        })
-    else:
-        response = build_tts_response(speech_text, actions)
-        response["text"] = text
-        response["awaiting_tools"] = False
-        print(f"[REQUEST] Fertig in {time.time() - start_time_total:.2f}s")
-        return jsonify(response)
+    result = submit_gpu_job(job_fn)
+    print(f"[REQUEST] /prompt fertig in {time.time() - start_time_total:.2f}s")
+    return jsonify(result)
 
 
 @app.route("/followup", methods=["POST"])
 def followup():
-    """
-    C# ruft diesen Endpoint auf, nachdem alle Tool-Ergebnisse per /tool_result
-    eingetragen wurden.
-
-    Body (JSON):
-    {
-        "session_id": "...",
-        "tool_results": {          // Optional: C# kann Ergebnisse direkt mitschicken
-            "GetStatus": "...",    // statt vorher /tool_result aufzurufen
-            "GetEvents": "..."
-        }
-    }
-    """
-    print("[FOLLOWUP] Follow-up Anfrage erhalten")
     start_time = time.time()
-
     try:
         data = request.get_json(force=True) or {}
     except Exception as e:
         return jsonify({"error": f"Ungültiger JSON-Body: {e}"}), 400
 
     session_id = data.get("session_id")
-    inline_results = data.get("tool_results", {})  # Optional: direkt mitgeschickte Ergebnisse
+    inline_results = data.get("tool_results", {})
 
-    # ── Session laden ─────────────────────────────────────────────────────────
-    if session_id and session_id in _pending_sessions:
-        session = _pending_sessions.pop(session_id)
-        original_text = session["original_text"]
-        # Merge: erst gespeicherte Ergebnisse, dann inline überschreiben
-        tool_results = {**session.get("tool_results", {}), **inline_results}
-        print(f"[FOLLOWUP] Session {session_id} geladen: original_text={original_text!r}")
-    elif inline_results:
-        # Kein session_id, aber direkte Ergebnisse + original_text im Body
-        original_text = data.get("original_text", "")
-        tool_results = inline_results
-        print(f"[FOLLOWUP] Kein Session-ID, nutze inline Daten: {original_text!r}")
-    else:
-        print(f"[FOLLOWUP] Session {session_id!r} nicht gefunden")
-        return jsonify({"error": "Session nicht gefunden oder abgelaufen"}), 404
+    with _pending_lock:
+        if session_id and session_id in _pending_sessions:
+            session = _pending_sessions.pop(session_id)
+            original_text = session["original_text"]
+            tool_results = {**session.get("tool_results", {}), **inline_results}
+        elif inline_results:
+            original_text = data.get("original_text", "")
+            tool_results = inline_results
+        else:
+            return jsonify({"error": "Session nicht gefunden oder abgelaufen"}), 404
 
     if not tool_results:
-        print("[FOLLOWUP] Keine Tool-Ergebnisse vorhanden")
         return jsonify({"error": "Keine Tool-Ergebnisse"}), 400
 
-    print(f"[FOLLOWUP] Tool-Ergebnisse: {list(tool_results.keys())}")
+    def job_fn(job):
+        try:
+            ai_result = ask_ai(original_text, tool_results)
+            speech_text = ai_result.get("speech", "")
+        except Exception as e:
+            print(f"[FOLLOWUP] AI-FEHLER: {e}")
+            print(traceback.format_exc())
+            speech_text = "Die Informationen... sie verwirren mich."
+        job["result"] = build_tts_response(speech_text, [])
 
-    # ── Zweiter AI-Schritt ────────────────────────────────────────────────────
-    try:
-        ai_result = ask_ai(original_text, tool_results)
-        speech_text = ai_result.get("speech", "")
-        # Im zweiten Schritt keine weiteren Actions erlaubt
-        print(f"[FOLLOWUP] Finale Antwort: {speech_text!r}")
-    except Exception as e:
-        print(f"[FOLLOWUP] AI-FEHLER: {e}")
-        print(traceback.format_exc())
-        speech_text = "Die Informationen... sie verwirren mich."
-
-    # ── TTS ───────────────────────────────────────────────────────────────────
-    response = build_tts_response(speech_text, [])
+    result = submit_gpu_job(job_fn)
     print(f"[FOLLOWUP] Fertig in {time.time() - start_time:.2f}s")
-    return jsonify(response)
+    return jsonify(result)
 
 
 @app.route("/tool_result", methods=["POST"])
 def tool_result():
-    """
-    Erhält Tool-Ergebnisse vom C#-Server.
-
-    Body (JSON):
-    {
-        "tool": "GetStatus",
-        "result": "...",
-        "session_id": "..."   // Optional: weist Ergebnis einer Session zu
-    }
-    """
     global _tool_results
     try:
         data = request.get_json(force=True) or {}
@@ -704,18 +692,15 @@ def tool_result():
         if not tool_name or result is None:
             return jsonify({"status": "error", "error": "tool und result erforderlich"}), 400
 
-        # In Session speichern (falls vorhanden)
-        if session_id and session_id in _pending_sessions:
-            _pending_sessions[session_id]["tool_results"][tool_name] = result
-            _pending_sessions[session_id]["received_tools"].add(tool_name)
-            print(f"[TOOL RESULT] {tool_name} → Session {session_id}")
-        else:
-            # Globaler Fallback (für alte C#-Integration ohne Session-ID)
-            _tool_results[tool_name] = result
-            if len(_tool_results) > 20:
-                oldest = next(iter(_tool_results))
-                del _tool_results[oldest]
-            print(f"[TOOL RESULT] {tool_name} (global, kein Session-Match)")
+        with _pending_lock:
+            if session_id and session_id in _pending_sessions:
+                _pending_sessions[session_id]["tool_results"][tool_name] = result
+                _pending_sessions[session_id]["received_tools"].add(tool_name)
+            else:
+                _tool_results[tool_name] = result
+                if len(_tool_results) > 20:
+                    oldest = next(iter(_tool_results))
+                    del _tool_results[oldest]
 
         return jsonify({"status": "ok"})
     except Exception as e:
@@ -726,13 +711,10 @@ def tool_result():
 @app.route("/register_tools", methods=["POST"])
 def register_tools():
     global _tool_registry
-    print("[TOOLS] Registriere Tools...")
     try:
         data = request.get_json(force=True) or {}
         _tool_registry = data
         print(f"[TOOLS] {len(_tool_registry)} Tools registriert: {list(_tool_registry.keys())}")
-        for name, info in _tool_registry.items():
-            print(f"[TOOLS]   - {name}: {info.get('description', 'keine Beschreibung')}")
     except Exception as e:
         print(f"[TOOLS] FEHLER beim Registrieren: {e}")
         return jsonify({"status": "error", "error": str(e)}), 400
@@ -748,7 +730,22 @@ def health():
         "tools_count": len(_tool_registry),
         "registered_tools": list(_tool_registry.keys()),
         "pending_sessions": len(_pending_sessions),
+        "gpu_queue_depth": _gpu_queue.qsize(),
     })
+
+
+@app.route("/gpu_status", methods=["GET"])
+def gpu_status():
+    """Roher nvidia-smi Output zur schnellen Sichtprüfung der GPU-Auslastung/VRAM."""
+    try:
+        out = subprocess.run(
+            ["nvidia-smi", "--query-gpu=name,utilization.gpu,memory.used,memory.total,temperature.gpu",
+             "--format=csv,noheader"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5, check=True,
+        )
+        return jsonify({"gpu": out.stdout.decode().strip()})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/debug_info", methods=["GET"])
@@ -763,6 +760,10 @@ def debug_info():
         "tool_results_count": len(_tool_results),
         "tool_results_keys": list(_tool_results.keys()),
         "pending_sessions": list(_pending_sessions.keys()),
+        "llm_n_ctx": LLM_N_CTX,
+        "llm_n_batch": LLM_N_BATCH,
+        "stt_compute_type": STT_COMPUTE_TYPE,
+        "cpu_threads": _CPU_COUNT,
     })
 
 
@@ -772,6 +773,13 @@ if __name__ == "__main__":
     print("=" * 60)
     print(f"[START] TTS Voice: {'Verfügbar' if tts_voice is not None else 'NICHT VERFÜGBAR'}")
     print(f"[START] LLM: {'Verfügbar' if llm is not None else 'NICHT VERFÜGBAR'}")
-    print("[START] Server läuft auf 0.0.0.0:5000")
+    print(f"[START] LLM n_ctx={LLM_N_CTX} n_batch={LLM_N_BATCH} n_ubatch={LLM_N_UBATCH}")
+    print(f"[START] STT compute_type={STT_COMPUTE_TYPE}")
+
+    _warmup()
+
+    print("[START] Server läuft auf 0.0.0.0:5000 (threaded=True)")
     print("=" * 60)
-    app.run(host="0.0.0.0", port=5000, threaded=False, debug=False)
+    # threaded=True: Flask nimmt mehrere Requests gleichzeitig an (I/O-parallel),
+    # die eigentliche GPU-Arbeit läuft trotzdem sicher seriell über den Worker.
+    app.run(host="0.0.0.0", port=5000, threaded=True, debug=False)
