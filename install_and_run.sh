@@ -16,7 +16,8 @@ set -euo pipefail
 REPO_URL="https://github.com/Site-RP/SCP1356AI.git"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/SCP1356AI}"
 VENV_DIR="${INSTALL_DIR}/venv"
-CUDA_VERSION="12-4"                 # apt-Paketsuffix, z.B. cuda-toolkit-12-4
+CUDA_VERSION="12-8"                 # apt-Paketsuffix, z.B. cuda-toolkit-12-8 (Blackwell/sm_120 braucht >=12.8)
+CUDNN_PACKAGE="cudnn9-cuda-12"       # cuDNN 9 wird für CUDA 12.8 benötigt
 SERVER_ENTRY="${SERVER_ENTRY:-server.py}"   # Passe an, falls die Startdatei anders heißt
 LOG_FILE="${INSTALL_DIR}/server.log"
 
@@ -49,8 +50,38 @@ else
     nvidia-smi || true
 fi
 
-if ! command -v nvcc &>/dev/null; then
-    log "Installiere CUDA Toolkit ${CUDA_VERSION}..."
+# Automatische Erkennung der GPU-Architektur (Compute Capability) statt fest
+# codierter Werte — funktioniert für V100 (70), Ampere (80/86), Ada/RTX 4090 (89),
+# Blackwell/RTX 50-Serie (120) etc. Override per: GPU_ARCH=89 ./install.sh
+GPU_ARCH="${GPU_ARCH:-auto}"
+if [[ "$GPU_ARCH" == "auto" ]] && command -v nvidia-smi &>/dev/null; then
+    RAW_CC=$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader -i 0 2>/dev/null | head -1)
+    if [[ -n "$RAW_CC" ]]; then
+        GPU_ARCH=$(echo "$RAW_CC" | tr -d '.' | tr -d ' ')
+        log "GPU Compute Capability erkannt: ${RAW_CC} → sm_${GPU_ARCH}"
+    else
+        GPU_ARCH="89"
+        warn "Konnte Compute Capability nicht auslesen, nutze Ada-Default sm_89 (RTX 4090)."
+    fi
+elif [[ "$GPU_ARCH" == "auto" ]]; then
+    GPU_ARCH="89"
+    warn "nvidia-smi nicht gefunden, nutze Ada-Default sm_89 (RTX 4090)."
+fi
+
+# Blackwell (RTX 50-Serie) braucht CUDA >= 12.8. Ada/RTX 4090 läuft ab CUDA 12.0
+# problemlos — CUDA 12.8 funktioniert dank Abwärtskompatibilität aber genauso gut,
+# daher lassen wir den Toolkit-Wert oben unverändert bei 12-8, das ist die sichere
+# Wahl für beide Kartengenerationen.
+if command -v nvidia-smi &>/dev/null; then
+    GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader -i 0 2>/dev/null || echo "unbekannt")
+    log "Erkannte GPU: ${GPU_NAME}"
+    if echo "$GPU_NAME" | grep -qiE "RTX 50|B100|B200|GB2"; then
+        log "Blackwell-GPU erkannt — CUDA ${CUDA_VERSION}+ und aktueller Treiber sind Pflicht."
+    fi
+fi
+
+if ! command -v nvcc &>/dev/null || ! nvcc --version | grep -q "release 12\.\(8\|9\)\|release 1[3-9]\."; then
+    log "Installiere/aktualisiere CUDA Toolkit ${CUDA_VERSION}..."
     UBUNTU_CODENAME=$(lsb_release -cs 2>/dev/null || echo "jammy")
     UBUNTU_VER=$(lsb_release -rs 2>/dev/null | tr -d '.')
     CUDA_KEYRING_URL="https://developer.download.nvidia.com/compute/cuda/repos/ubuntu${UBUNTU_VER}/x86_64/cuda-keyring_1.1-1_all.deb"
@@ -59,12 +90,19 @@ if ! command -v nvcc &>/dev/null; then
     if wget -q "$CUDA_KEYRING_URL" -O "$TMP_DEB"; then
         $SUDO dpkg -i "$TMP_DEB"
         $SUDO apt-get update -y
-        $SUDO DEBIAN_FRONTEND=noninteractive apt-get install -y "cuda-toolkit-${CUDA_VERSION}" || \
-            warn "cuda-toolkit-${CUDA_VERSION} nicht verfügbar, versuche generisches 'cuda-toolkit'..." && \
-            ($SUDO DEBIAN_FRONTEND=noninteractive apt-get install -y cuda-toolkit || warn "CUDA Toolkit Installation fehlgeschlagen — bitte manuell prüfen.")
+        if ! $SUDO DEBIAN_FRONTEND=noninteractive apt-get install -y "cuda-toolkit-${CUDA_VERSION}"; then
+            warn "cuda-toolkit-${CUDA_VERSION} nicht verfügbar, versuche generisches 'cuda-toolkit' (neueste Version)..."
+            $SUDO DEBIAN_FRONTEND=noninteractive apt-get install -y cuda-toolkit || \
+                warn "CUDA Toolkit Installation fehlgeschlagen — bitte manuell prüfen: https://developer.nvidia.com/cuda-downloads"
+        fi
+
+        # cuDNN 9 (Pflicht für CUDA 12.8 + Blackwell, u.a. für onnxruntime-gpu/ctranslate2)
+        log "Installiere cuDNN 9 (${CUDNN_PACKAGE})..."
+        $SUDO DEBIAN_FRONTEND=noninteractive apt-get install -y "${CUDNN_PACKAGE}" || \
+            warn "${CUDNN_PACKAGE} nicht per apt verfügbar — Fallback: pip-Paket nvidia-cudnn-cu12 wird später mitinstalliert."
     else
         warn "Konnte CUDA-Keyring nicht laden (Ubuntu ${UBUNTU_VER} evtl. nicht unterstützt)."
-        warn "Bitte CUDA ggf. manuell installieren: https://developer.nvidia.com/cuda-downloads"
+        warn "Bitte CUDA >= 12.8 ggf. manuell installieren: https://developer.nvidia.com/cuda-downloads"
     fi
 
     # CUDA PATH persistieren
@@ -78,10 +116,20 @@ if ! command -v nvcc &>/dev/null; then
         export LD_LIBRARY_PATH="${CUDA_HOME_GUESS}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     fi
 else
-    log "CUDA Toolkit bereits vorhanden: $(nvcc --version | tail -1)"
+    log "CUDA Toolkit bereits vorhanden und kompatibel: $(nvcc --version | tail -1)"
 fi
 
-# cuDNN wird i.d.R. über onnxruntime-gpu / ctranslate2 Wheels mitgeliefert.
+# Treiber-Version grob prüfen — Mindestanforderung hängt von der Architektur ab:
+# Blackwell (sm_120) >= 570.x, Ada/RTX 4090 (sm_89) reicht ab >= 525.x
+if command -v nvidia-smi &>/dev/null; then
+    DRIVER_VER=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader -i 0 2>/dev/null | cut -d. -f1)
+    MIN_DRIVER=525
+    [[ "$GPU_ARCH" == "120" ]] && MIN_DRIVER=570
+    if [[ -n "${DRIVER_VER:-}" ]] && [[ "$DRIVER_VER" -lt "$MIN_DRIVER" ]]; then
+        warn "NVIDIA-Treiber ${DRIVER_VER}.x erkannt — für sm_${GPU_ARCH} wird Treiber >= ${MIN_DRIVER}.x empfohlen."
+        warn "Bitte Host-Treiber aktualisieren: https://www.nvidia.com/Download/index.aspx"
+    fi
+fi
 
 # ── 3. Repository klonen ─────────────────────────────────────────────────
 log "Klone Repository ${REPO_URL} nach ${INSTALL_DIR}..."
@@ -116,15 +164,16 @@ gunicorn==22.0.0
 numpy==1.26.4
 scipy==1.13.1
 faster-whisper==1.0.3
-ctranslate2==4.3.1
+ctranslate2==4.5.0
 av==12.3.0
 huggingface_hub==0.24.6
 tokenizers==0.19.1
-onnxruntime-gpu==1.18.1
+onnxruntime-gpu==1.20.1
 piper-tts==1.2.0
 piper-phonemize==1.1.0
 onnx==1.16.2
-llama-cpp-python==0.2.90
+llama-cpp-python==0.3.9
+nvidia-cudnn-cu12==9.3.0.75
 requests==2.32.3
 tqdm==4.66.5
 soundfile==0.12.1
@@ -141,11 +190,14 @@ fi
 log "Installiere alle Python-Pakete aus requirements.txt..."
 pip install -r "$REQ_FILE"
 
-# ── 6. llama-cpp-python explizit MIT CUDA-Support neu bauen ─────────────
-# (Das reine pip-Wheel oben ist meist CPU-only – wir erzwingen hier GPU-Build)
-log "Baue llama-cpp-python mit CUDA (GGML_CUDA) neu..."
-CMAKE_ARGS="-DGGML_CUDA=on" FORCE_CMAKE=1 \
-    pip install --upgrade --force-reinstall --no-cache-dir llama-cpp-python==0.2.90 \
+# ── 6. llama-cpp-python explizit MIT CUDA-Support für erkannte Architektur neu bauen ─
+# (Das reine pip-Wheel oben ist meist CPU-only – wir erzwingen hier GPU-Build.
+#  CMAKE_CUDA_ARCHITECTURES=${GPU_ARCH} zielt auf die oben automatisch erkannte
+#  Architektur, z.B. 89 für RTX 4090, 120 für RTX 5060 Ti. Für gemischte Hardware
+#  kann GPU_ARCH auch eine Semikolon-Liste sein, z.B. GPU_ARCH="89;120" ./install.sh)
+log "Baue llama-cpp-python mit CUDA (GGML_CUDA, sm_${GPU_ARCH}) neu..."
+CMAKE_ARGS="-DGGML_CUDA=on -DCMAKE_CUDA_ARCHITECTURES=${GPU_ARCH}" FORCE_CMAKE=1 \
+    pip install --upgrade --force-reinstall --no-cache-dir llama-cpp-python==0.3.9 \
     || warn "CUDA-Build von llama-cpp-python fehlgeschlagen — Fallback auf CPU-Version aus requirements.txt."
 
 # ── 7. Cloudflare Tunnel installieren (NICHT starten) ────────────────────
