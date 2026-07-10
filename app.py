@@ -36,11 +36,12 @@ TTS_MODEL_PATH = os.path.join(MODELS_DIR, "de_DE-thorsten-high.onnx")
 LLM_MODEL_PATH = os.path.join(MODELS_DIR, "Qwen2.5-7B-Instruct-Q4_K_M.gguf")
 
 # ── GPU-Tuning-Parameter (per ENV überschreibbar) ────────────────────────────
-# RTX 5060 Ti hat 16GB VRAM — für Qwen2.5-7B-Q4 (~4.7GB) + Whisper-small (~1.5GB)
-# ist reichlich Platz für einen deutlich größeren Context und größere Batches.
-LLM_N_CTX = int(os.environ.get("LLM_N_CTX", 8192))
-LLM_N_BATCH = int(os.environ.get("LLM_N_BATCH", 1024))
-LLM_N_UBATCH = int(os.environ.get("LLM_N_UBATCH", 1024))
+# Defaults sind für 24GB-Karten (z.B. RTX 4090) ausgelegt: Qwen2.5-7B-Q4 (~4.7GB)
+# + Whisper-small (~1.5GB) lassen selbst bei n_ctx=16384 noch ~15GB VRAM frei.
+# Für 16GB-Karten (z.B. RTX 5060 Ti) setze LLM_N_CTX=8192 LLM_N_BATCH=1024 als ENV.
+LLM_N_CTX = int(os.environ.get("LLM_N_CTX", 16384))
+LLM_N_BATCH = int(os.environ.get("LLM_N_BATCH", 2048))
+LLM_N_UBATCH = int(os.environ.get("LLM_N_UBATCH", 2048))
 LLM_MAX_TOKENS = int(os.environ.get("LLM_MAX_TOKENS", 40))
 STT_COMPUTE_TYPE = os.environ.get("STT_COMPUTE_TYPE", "float16")
 STT_MODEL_SIZE = os.environ.get("STT_MODEL_SIZE", "small")
