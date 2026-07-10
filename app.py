@@ -4,6 +4,28 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODELS_DIR = os.path.join(BASE_DIR, "models")
 HF_CACHE_DIR = os.path.join(BASE_DIR, "hf_cache")
 
+import sys as _sys
+
+SERVER_LOG_PATH = os.path.join(BASE_DIR, "server.log")
+
+class _Tee:
+    def __init__(self, *streams):
+        self.streams = streams
+
+    def write(self, data):
+        for s in self.streams:
+            s.write(data)
+            s.flush()
+
+    def flush(self):
+        for s in self.streams:
+            s.flush()
+
+_log_fh = open(SERVER_LOG_PATH, "a", encoding="utf-8", buffering=1)
+
+_sys.stdout = _Tee(_sys.stdout, _log_fh)
+_sys.stderr = _Tee(_sys.stderr, _log_fh)
+
 # ── Basis-Environment (Thread-Zahl wird weiter unten nach der Hardware-
 # Erkennung final gesetzt, hier nur die Pfade/Caches vorbereiten) ───────────
 os.environ["HF_HOME"] = HF_CACHE_DIR
@@ -29,6 +51,21 @@ import queue
 import uuid
 
 app = Flask(__name__)
+
+import time as _time
+
+@app.before_request
+def _log_request_start():
+    request._dash_start = _time.time()
+
+@app.after_request
+def _log_request_end(response):
+    try:
+        dur = _time.time() - getattr(request, "_dash_start", _time.time())
+        print(f"[REQUEST] {request.method} {request.path} -> {response.status_code} ({dur:.3f}s)")
+    except Exception:
+        pass
+    return response
 
 # ── Pfade zu lokalen Modellen ────────────────────────────────────────────────
 TTS_MODEL_PATH = os.path.join(MODELS_DIR, "de_DE-thorsten-high.onnx")
