@@ -1,6 +1,0 @@
-numpy
-Flask
-faster-whisper
-scipy
-piper-tts
-llama-cpp-python
