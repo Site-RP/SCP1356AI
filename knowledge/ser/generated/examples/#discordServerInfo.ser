@@ -1,0 +1,40 @@
+# Disabled by default: remove # from the filename to enable this script.
+# this script creates a discord webhook informing of the players currently on the server
+
+!-- OnEvent WaitingForPlayers
+
+# this is the webhook URL, please set one here in order for this script to work
+$url = ""
+
+func *GetDiscordMessage
+    # variables using 'ephm' are ephemeral and will be deleted after the function ends
+    ephm $title = "{ServerInfo name} status"
+    ephm $content = "There are {AmountOf @all} players on the server:{Show @all name "<br> -" true}"
+    
+    return Discord.CreateMessage _ $title _ {Embed.Create $title $content}
+end
+
+if {$url -> length} is 0
+    Print "The discord server info system cannot run, because the webhook URL was not set!"
+    stop
+end
+
+# use an attempt statement in case something goes wrong
+# like an invalid URL error
+attempt
+    # create a message to later edit
+    # IMPORTANT! this will create message every round
+    # if you wish to not, just hardcode the message id
+    *msg = run *GetDiscordMessage
+    $messageId = Discord.SendMessageAndWait $url *msg
+    
+    # update the message every 2 seconds
+    forever
+        wait 2s
+    
+        *msg = run *GetDiscordMessage
+        Discord.EditMessage $url $messageId *msg
+    end
+on_error with $err
+    Error ($err + " Make sure that the webhook URL is correct!")
+end

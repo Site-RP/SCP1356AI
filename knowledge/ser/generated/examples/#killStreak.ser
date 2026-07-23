@@ -1,0 +1,33 @@
+# Disabled by default: remove # from the filename to enable this script.
+# this script adds a custom kill streak counter
+
+!-- OnEvent Death
+-- require @evPlayer
+
+SetPlayerData @evPlayer "streak" 0
+Broadcast @evPlayer 5s "Your killstreak has been reset!"
+
+if {VarExists @evAttacker} is false
+    stop
+end
+
+if {Overlapping @evPlayer @evAttacker}
+    stop
+end
+
+# increment killer's streak
+$streak = GetPlayerData @evAttacker "streak" 0
+$streak = $streak + 1
+
+# save the new kill streak
+SetPlayerData @evAttacker "streak" $streak
+
+# inform attacker of kill
+Broadcast @evAttacker 5s "Killstreak: {$streak}"
+
+# announce milestone
+if $streak is 5
+    Broadcast @all 5s "{@evAttacker -> name} is on a KILLING SPREE (5 Kills)!"
+elif $streak is 10
+    Broadcast @all 5s "{@evAttacker -> name} is UNSTOPPABLE (10 Kills)!"
+end

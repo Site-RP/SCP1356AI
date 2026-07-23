@@ -1,0 +1,12 @@
+# Disabled by default: remove # from the filename to enable this script.
+# utility script to automatically enable round lock
+
+!-- OnEvent RoundStarted
+
+if {AmountOf @all} isnt 1
+    stop
+end
+
+Print "SER enabled round lock!"
+Broadcast @all 10s "<color=green>SER enabled round lock!"
+SetRoundLock true

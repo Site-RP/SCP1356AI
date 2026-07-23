@@ -1,0 +1,12 @@
+{
+  "status": "ok",
+  "generated_at": 1784758543.322268,
+  "source": "ScriptedEventsReloaded-main.zip",
+  "source_type": "zip",
+  "source_sha256": "e0260646b1f35b26a9fcf27d69fe408d7179b050337073156f8285b141e99b5b",
+  "methods": 259,
+  "groups": 44,
+  "examples": 27,
+  "docs": 3,
+  "runtime_allowlist_changed": false
+}

@@ -1,0 +1,57 @@
+# Disabled by default: remove # from the filename to enable this script.
+# this script adds a custom "hot potato" event
+
+!-- OnEvent RoundStarted
+
+# there is a 50% chance that the event will not happen
+chance 50%
+    Print "Hot Potato event will not be loaded"
+    stop
+end
+
+Print "Hot Potato event was loaded"
+Broadcast @all 5s "Be ready for a Hot Potato!"
+
+# this is the main loop of the event
+forever
+    wait {ToDuration {Random 30 90} seconds}
+
+    # Get a random player from the alive players that are not SCPs
+    @potatoCarrier = Take {Except @alivePlayers @scpPlayers} 1
+
+    # if no player is alive, continue to next attempt
+    if {AmountOf @potatoCarrier} is 0
+        continue
+    end
+    
+    # try and give the GunA7 as the hot potato
+    *item = AdvGiveItem @potatoCarrier GunA7
+    
+    # if failed to give the item, continue to next attempt
+    if {*item -> isInvalid}
+        continue
+    end
+    
+    # inform the player that they have the hot potato
+    Hint @potatoCarrier 3s "YOU HAVE THE HOT POTATO!<br>DROP IT OR DIE!"
+
+    wait 6s
+    
+    # ITEM WAS NOT DROPPED = EXPLOSION
+    if {*item -> inInventory}
+        Explode {*item -> currentOwner}
+        Broadcast @all 5s "Player {*item -> currentOwner -> name} has failed the Hot Potato!"
+    end
+
+    # remove the item so people dont use it
+    AdvDestroyItem *item
+        
+    # 70% chance for the event to continue
+    chance 70%
+        Broadcast @all 5s "The Hot Potato will return soon!"
+        continue
+    else
+        Broadcast @all 5s "The Hot Potato got tired and will not return..."
+        stop
+    end
+end

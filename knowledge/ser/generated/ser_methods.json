@@ -1,0 +1,4859 @@
+{
+  "generated_at": 1784758543.321549,
+  "source_sha256": "e0260646b1f35b26a9fcf27d69fe408d7179b050337073156f8285b141e99b5b",
+  "method_count": 259,
+  "methods": [
+    {
+      "name": "SetCameraProperties",
+      "description": "Sets the properties of a {nameof(CameraToy)}.",
+      "arguments": [
+        {
+          "name": "camera reference",
+          "type": "Reference<CameraToy>"
+        },
+        {
+          "name": "label",
+          "type": "Text"
+        },
+        {
+          "name": "up constraint",
+          "type": "Float"
+        },
+        {
+          "name": "down constraint",
+          "type": "Float"
+        },
+        {
+          "name": "left constraint",
+          "type": "Float"
+        },
+        {
+          "name": "right constraint",
+          "type": "Float"
+        },
+        {
+          "name": "minimal zoom",
+          "type": "Float"
+        },
+        {
+          "name": "maximal zoom",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToyProperty",
+      "source": "Code/MethodSystem/Methods/AdminToyPropertyMethods/SetCameraPropertiesMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetInteractableProperties",
+      "description": "Sets properties of an Interactable Toy.",
+      "arguments": [
+        {
+          "name": "toy",
+          "type": "Reference<InteractableToy>"
+        },
+        {
+          "name": "shape",
+          "type": "Enum<InvisibleInteractableToy.ColliderShape>"
+        },
+        {
+          "name": "interaction duration",
+          "type": "Duration"
+        },
+        {
+          "name": "is locked",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToyProperty",
+      "source": "Code/MethodSystem/Methods/AdminToyPropertyMethods/SetInteractablePropertiesMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetLightSourceProperties",
+      "description": "Sets the properties of a {nameof(LightSourceToy)}.",
+      "arguments": [
+        {
+          "name": "light reference",
+          "type": "Reference<LightSourceToy>"
+        },
+        {
+          "name": "intensity",
+          "type": "Float"
+        },
+        {
+          "name": "range",
+          "type": "Float"
+        },
+        {
+          "name": "color",
+          "type": "Color"
+        },
+        {
+          "name": "shadow type",
+          "type": "Enum<LightShadows>"
+        },
+        {
+          "name": "shadow strength",
+          "type": "Float"
+        },
+        {
+          "name": "light type",
+          "type": "Enum<LightType>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToyProperty",
+      "source": "Code/MethodSystem/Methods/AdminToyPropertyMethods/SetLightSourcePropertiesMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetPrimitiveObjectProperties",
+      "description": "Sets properties of a {nameof(PrimitiveObjectToy)}.",
+      "arguments": [
+        {
+          "name": "toy reference",
+          "type": "Reference<PrimitiveObjectToy>"
+        },
+        {
+          "name": "type",
+          "type": "Enum<PrimitiveType>"
+        },
+        {
+          "name": "color",
+          "type": "Color"
+        },
+        {
+          "name": "flags",
+          "type": "Enum<PrimitiveFlags>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToyProperty",
+      "source": "Code/MethodSystem/Methods/AdminToyPropertyMethods/SetPrimitiveObjectPropertiesMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetShootingTargetProperties",
+      "description": "Sets the properties of a {nameof(ShootingTargetToy)}.",
+      "arguments": [
+        {
+          "name": "target reference",
+          "type": "Reference<ShootingTargetToy>"
+        },
+        {
+          "name": "max hp",
+          "type": "Int"
+        },
+        {
+          "name": "auto reset time",
+          "type": "Int"
+        },
+        {
+          "name": "synchronize damage?",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToyProperty",
+      "source": "Code/MethodSystem/Methods/AdminToyPropertyMethods/SetShootingTargetPropertiesMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetTextProperties",
+      "description": "Sets the properties of a {nameof(TextToy)}.",
+      "arguments": [
+        {
+          "name": "text toy reference",
+          "type": "Reference<TextToy>"
+        },
+        {
+          "name": "label",
+          "type": "Text"
+        },
+        {
+          "name": "display width",
+          "type": "Float"
+        },
+        {
+          "name": "display height",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToyProperty",
+      "source": "Code/MethodSystem/Methods/AdminToyPropertyMethods/SetTextPropertiesMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Toy.Create",
+      "description": "Creates an Admin Toy",
+      "arguments": [
+        {
+          "name": "toy type",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToys",
+      "source": "Code/MethodSystem/Methods/AdminToysMethods/Toy_CreateMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Toy.Destroy",
+      "description": "Destroys an Admin Toy.",
+      "arguments": [
+        {
+          "name": "toy reference",
+          "type": "Reference<AdminToy>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToys",
+      "source": "Code/MethodSystem/Methods/AdminToysMethods/Toy_DestroyMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Toy.Info",
+      "description": "Returns information about an Admin Toy",
+      "arguments": [
+        {
+          "name": "toy reference",
+          "type": "Reference<AdminToy>"
+        },
+        {
+          "name": "property",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToys",
+      "source": "Code/MethodSystem/Methods/AdminToysMethods/Toy_InfoMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Toy.Move",
+      "description": "Moves an Admin Toy relative to its rotation.",
+      "arguments": [
+        {
+          "name": "toy reference",
+          "type": "Reference<AdminToy>"
+        },
+        {
+          "name": "x position",
+          "type": "Float"
+        },
+        {
+          "name": "y position",
+          "type": "Float"
+        },
+        {
+          "name": "z position",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToys",
+      "source": "Code/MethodSystem/Methods/AdminToysMethods/Toy_MoveMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Toy.SetParent",
+      "description": "Sets the parent of a toy (So that the toy follows it).",
+      "arguments": [
+        {
+          "name": "toy reference",
+          "type": "Reference<AdminToy>"
+        },
+        {
+          "name": "parent type",
+          "type": "Options"
+        },
+        {
+          "name": "player parent",
+          "type": "Player"
+        },
+        {
+          "name": "toy parent",
+          "type": "Reference<AdminToy>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToys",
+      "source": "Code/MethodSystem/Methods/AdminToysMethods/Toy_SetParentMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Toy.SetRotation",
+      "description": "Sets the rotation of a toy.",
+      "arguments": [
+        {
+          "name": "toy reference",
+          "type": "Reference<AdminToy>"
+        },
+        {
+          "name": "rotation mode",
+          "type": "Options"
+        },
+        {
+          "name": "x rotation",
+          "type": "Float"
+        },
+        {
+          "name": "y rotation",
+          "type": "Float"
+        },
+        {
+          "name": "z rotation",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToys",
+      "source": "Code/MethodSystem/Methods/AdminToysMethods/Toy_SetRotationMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Toy.SetScale",
+      "description": "Sets the scale of a toy.",
+      "arguments": [
+        {
+          "name": "toy reference",
+          "type": "Reference<AdminToy>"
+        },
+        {
+          "name": "scale mode",
+          "type": "Options"
+        },
+        {
+          "name": "x scale",
+          "type": "Float"
+        },
+        {
+          "name": "y scale",
+          "type": "Float"
+        },
+        {
+          "name": "z scale",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToys",
+      "source": "Code/MethodSystem/Methods/AdminToysMethods/Toy_SetScaleMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Toy.TPPlayer",
+      "description": "Teleports an Admin Toy to a given player",
+      "arguments": [
+        {
+          "name": "toy reference",
+          "type": "Reference<AdminToy>"
+        },
+        {
+          "name": "player to teleport toy to",
+          "type": "Player"
+        },
+        {
+          "name": "align toy rotation to player?",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToys",
+      "source": "Code/MethodSystem/Methods/AdminToysMethods/Toy_TPPlayerMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Toy.TPPosition",
+      "description": "Teleports an Admin Toy to the given absolute coordinates",
+      "arguments": [
+        {
+          "name": "toy reference",
+          "type": "Reference<AdminToy>"
+        },
+        {
+          "name": "mode",
+          "type": "Options"
+        },
+        {
+          "name": "x position",
+          "type": "Float"
+        },
+        {
+          "name": "y position",
+          "type": "Float"
+        },
+        {
+          "name": "z position",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToys",
+      "source": "Code/MethodSystem/Methods/AdminToysMethods/Toy_TPPositionMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Toy.TPRoom",
+      "description": "Teleports an Admin Toy to the given room",
+      "arguments": [
+        {
+          "name": "toy reference",
+          "type": "Reference<AdminToy>"
+        },
+        {
+          "name": "room to teleport toy to",
+          "type": "Room"
+        },
+        {
+          "name": "relative x",
+          "type": "Float"
+        },
+        {
+          "name": "relative y",
+          "type": "Float"
+        },
+        {
+          "name": "relative z",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "AdminToys",
+      "source": "Code/MethodSystem/Methods/AdminToysMethods/Toy_TPRoomMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Audio.IsLoaded",
+      "description": "Returns true if a given audio clip has been loaded",
+      "arguments": [
+        {
+          "name": "clip name",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Audio",
+      "source": "Code/MethodSystem/Methods/AudioMethods/Audio_IsLoadedMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Audio.IsPlaying",
+      "description": "Checks if the audio player is playing anything.",
+      "arguments": [
+        {
+          "name": "speaker name",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Audio",
+      "source": "Code/MethodSystem/Methods/AudioMethods/Audio_IsPlayingMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Audio.Load",
+      "description": "Loads an audio file into the audio player.",
+      "arguments": [
+        {
+          "name": "file path",
+          "type": "Text"
+        },
+        {
+          "name": "clip name",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Audio",
+      "source": "Code/MethodSystem/Methods/AudioMethods/Audio_LoadMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Audio.Play",
+      "description": "Plays a loaded audio clip from a created speaker.",
+      "arguments": [
+        {
+          "name": "speaker name",
+          "type": "Text"
+        },
+        {
+          "name": "audio clip name",
+          "type": "Text"
+        },
+        {
+          "name": "loop?",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Audio",
+      "source": "Code/MethodSystem/Methods/AudioMethods/Audio_PlayMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Audio.Stop",
+      "description": "Plays a loaded audio clip from a created speaker.",
+      "arguments": [
+        {
+          "name": "speaker name",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Audio",
+      "source": "Code/MethodSystem/Methods/AudioMethods/Audio_StopMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Speaker.CreateGlobal",
+      "description": "Creates a speaker to play audio through.",
+      "arguments": [
+        {
+          "name": "speaker name",
+          "type": "Text"
+        },
+        {
+          "name": "volume",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Audio",
+      "source": "Code/MethodSystem/Methods/AudioMethods/Speaker_CreateGlobalMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Speaker.CreateOnPosition",
+      "description": "Creates a speaker in a specified XYZ position.",
+      "arguments": [
+        {
+          "name": "speaker name",
+          "type": "Text"
+        },
+        {
+          "name": "x",
+          "type": "Float"
+        },
+        {
+          "name": "y",
+          "type": "Float"
+        },
+        {
+          "name": "z",
+          "type": "Float"
+        },
+        {
+          "name": "volume",
+          "type": "Float"
+        },
+        {
+          "name": "min distance",
+          "type": "Float"
+        },
+        {
+          "name": "max distance",
+          "type": "Float"
+        },
+        {
+          "name": "is stereo",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Audio",
+      "source": "Code/MethodSystem/Methods/AudioMethods/Speaker_CreateOnPositionMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Speaker.CreatePlayerAttached",
+      "description": "Creates a speaker attached to a player to play audio through.",
+      "arguments": [
+        {
+          "name": "player to attach",
+          "type": "Player"
+        },
+        {
+          "name": "speaker name",
+          "type": "Text"
+        },
+        {
+          "name": "volume",
+          "type": "Float"
+        },
+        {
+          "name": "min distance",
+          "type": "Float"
+        },
+        {
+          "name": "max distance",
+          "type": "Float"
+        },
+        {
+          "name": "is stereo",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Audio",
+      "source": "Code/MethodSystem/Methods/AudioMethods/Speaker_CreatePlayerAttachedMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Speaker.Destroy",
+      "description": "Destroys a speaker.",
+      "arguments": [
+        {
+          "name": "speaker name",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Audio",
+      "source": "Code/MethodSystem/Methods/AudioMethods/Speaker_DestroyMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Speaker.Exists",
+      "description": "Returns true or false indicating if a speaker with the provided name exists.",
+      "arguments": [
+        {
+          "name": "speaker name",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Audio",
+      "source": "Code/MethodSystem/Methods/AudioMethods/Speaker_ExistsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "AnimatedBroadcast",
+      "description": "Sends an animated broadcast to specified players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "duration",
+          "type": "Duration"
+        },
+        {
+          "name": "content",
+          "type": "Text"
+        },
+        {
+          "name": "line break length",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Broadcast",
+      "source": "Code/MethodSystem/Methods/BroadcastMethods/AnimatedBroadcastMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Broadcast",
+      "description": "Sends a broadcast to players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "duration",
+          "type": "Duration"
+        },
+        {
+          "name": "message",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Broadcast",
+      "source": "Code/MethodSystem/Methods/BroadcastMethods/BroadcastMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ClearBroadcasts",
+      "description": "Clears broadcasts for players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Broadcast",
+      "source": "Code/MethodSystem/Methods/BroadcastMethods/ClearBroadcastsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ClearCountdown",
+      "description": "Removes an active countdown for players if one is active.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Broadcast",
+      "source": "Code/MethodSystem/Methods/BroadcastMethods/ClearCountdownMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Countdown",
+      "description": "Creates a countdown using broadcasts.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "duration",
+          "type": "Duration"
+        },
+        {
+          "name": "title",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Broadcast",
+      "source": "Code/MethodSystem/Methods/BroadcastMethods/CountdownMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Hint",
+      "description": "Sends a hint to players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "duration",
+          "type": "Duration"
+        },
+        {
+          "name": "message",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Broadcast",
+      "source": "Code/MethodSystem/Methods/BroadcastMethods/HintMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Vote.CreateOption",
+      "description": "Creates a vote option, which can be used in a vote.",
+      "arguments": [
+        {
+          "name": "option",
+          "type": "Text"
+        },
+        {
+          "name": "display text",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Callvote",
+      "source": "Code/MethodSystem/Methods/CallvoteMethods/Vote_CreateOptionMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Vote.Start",
+      "description": "Starts a vote.",
+      "arguments": [
+        {
+          "name": "question",
+          "type": "Text"
+        },
+        {
+          "name": "player asking",
+          "type": "Player"
+        },
+        {
+          "name": "options",
+          "type": "Reference<Vote_CreateOptionMethod.VoteOption>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Callvote",
+      "source": "Code/MethodSystem/Methods/CallvoteMethods/Vote_StartMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Vote.StartAndWait",
+      "description": "Starts a vote and waits until it is completed.",
+      "arguments": [
+        {
+          "name": "question",
+          "type": "Text"
+        },
+        {
+          "name": "player asking",
+          "type": "Player"
+        },
+        {
+          "name": "options",
+          "type": "Reference<Vote_CreateOptionMethod.VoteOption>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Callvote",
+      "source": "Code/MethodSystem/Methods/CallvoteMethods/Vote_StartAndWaitMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Cassie",
+      "description": "Makes a CASSIE announcement.",
+      "arguments": [
+        {
+          "name": "mode",
+          "type": "Options"
+        },
+        {
+          "name": "message",
+          "type": "Text"
+        },
+        {
+          "name": "subtitles",
+          "type": "Text"
+        },
+        {
+          "name": "glitch scale",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CASSIE",
+      "source": "Code/MethodSystem/Methods/CASSIEMethods/CassieMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ClearCassie",
+      "description": "Clears all CASSIE announcements, active or queued.",
+      "arguments": [],
+      "aliases": [],
+      "subgroup": "CASSIE",
+      "source": "Code/MethodSystem/Methods/CASSIEMethods/ClearCassieMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "IsCassieSpeaking",
+      "description": "Returns boolean value indicating if CASSIE is speaking.",
+      "arguments": [],
+      "aliases": [],
+      "subgroup": "CASSIE",
+      "source": "Code/MethodSystem/Methods/CASSIEMethods/IsCassieSpeakingMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "PlayerCassie",
+      "description": "Makes a CASSIE announcement to specified players only.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "mode",
+          "type": "Options"
+        },
+        {
+          "name": "message",
+          "type": "Text"
+        },
+        {
+          "name": "subtitles",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CASSIE",
+      "source": "Code/MethodSystem/Methods/CASSIEMethods/PlayerCassieMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Coll.Contains",
+      "description": "Returns true if the value exists in the collection",
+      "arguments": [
+        {
+          "name": "collection",
+          "type": "Collection"
+        },
+        {
+          "name": "value to check",
+          "type": "AnyValue"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CollectionVariable",
+      "source": "Code/MethodSystem/Methods/CollectionVariableMethods/Coll_ContainsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Coll.Create",
+      "description": "Returns an empty collection.",
+      "arguments": [],
+      "aliases": [],
+      "subgroup": "CollectionVariable",
+      "source": "Code/MethodSystem/Methods/CollectionVariableMethods/Coll_CreateMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Coll.Fetch",
+      "description": "Returns a value from a collection variable at a given position.",
+      "arguments": [
+        {
+          "name": "collection",
+          "type": "Collection"
+        },
+        {
+          "name": "index",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CollectionVariable",
+      "source": "Code/MethodSystem/Methods/CollectionVariableMethods/Coll_FetchMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Coll.Insert",
+      "description": "Adds a value to a collection variable",
+      "arguments": [
+        {
+          "name": "collection variable",
+          "type": "CollectionVariable"
+        },
+        {
+          "name": "value",
+          "type": "AnyValue"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CollectionVariable",
+      "source": "Code/MethodSystem/Methods/CollectionVariableMethods/Coll_InsertMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Coll.Join",
+      "description": "Returns a collection that has the combined values of all the given collections",
+      "arguments": [
+        {
+          "name": "collections",
+          "type": "Collection"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CollectionVariable",
+      "source": "Code/MethodSystem/Methods/CollectionVariableMethods/Coll_JoinMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Coll.Remove",
+      "description": "Removes a matching value from a collection variable",
+      "arguments": [
+        {
+          "name": "collection variable",
+          "type": "CollectionVariable"
+        },
+        {
+          "name": "value to remove",
+          "type": "AnyValue"
+        },
+        {
+          "name": "amount of matches to remove",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CollectionVariable",
+      "source": "Code/MethodSystem/Methods/CollectionVariableMethods/Coll_RemoveMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Coll.RemoveAt",
+      "description": "Removes a value at the provided index from a collection variable",
+      "arguments": [
+        {
+          "name": "collection variable",
+          "type": "CollectionVariable"
+        },
+        {
+          "name": "index",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CollectionVariable",
+      "source": "Code/MethodSystem/Methods/CollectionVariableMethods/Coll_RemoveAtMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Coll.Subtract",
+      "description": "Returns a collection that has the values of the first collection without the values of the latter",
+      "arguments": [
+        {
+          "name": "original collection",
+          "type": "Collection"
+        },
+        {
+          "name": "collections to remove values from",
+          "type": "Collection"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CollectionVariable",
+      "source": "Code/MethodSystem/Methods/CollectionVariableMethods/Coll_SubtractMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Command",
+      "description": "Runs a server command with full permission.",
+      "arguments": [
+        {
+          "name": "command",
+          "type": "Text"
+        },
+        {
+          "name": "sender",
+          "type": "Player"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Command",
+      "source": "Code/MethodSystem/Methods/CommandMethods/CommandMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ResetGlobalCommandCooldown",
+      "description": "Resets the global command cooldown for the 'CustomCommand' flag.",
+      "arguments": [
+        {
+          "name": "command",
+          "type": "Reference<CustomCommandFlag.CustomCommand>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Command",
+      "source": "Code/MethodSystem/Methods/CommandMethods/ResetGlobalCommandCooldownMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ResetPlayerCommandCooldown",
+      "description": "Resets a player's command cooldown from the 'CustomCommand' flag.",
+      "arguments": [
+        {
+          "name": "command",
+          "type": "Reference<CustomCommandFlag.CustomCommand>"
+        },
+        {
+          "name": "players",
+          "type": "Players"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Command",
+      "source": "Code/MethodSystem/Methods/CommandMethods/ResetPlayerCommandCooldownMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Config.GetOption",
+      "description": "Tries to get a value from a config.",
+      "arguments": [
+        {
+          "name": "config",
+          "type": "Reference<CustomConfig>"
+        },
+        {
+          "name": "keys",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Config",
+      "source": "Code/MethodSystem/Methods/ConfigMethods/Config_GetOptionMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Config.Read",
+      "description": "Reads and returns a config.",
+      "arguments": [
+        {
+          "name": "config name",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Config",
+      "source": "Code/MethodSystem/Methods/ConfigMethods/Config_ReadMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "CRole.CreateBracketSpawnSystem",
+      "description": "Creates a spawn for a custom roles that uses ranges of available players.",
+      "arguments": [
+        {
+          "name": "role to replace",
+          "type": "Enum<RoleTypeId>"
+        },
+        {
+          "name": "spawn brackets",
+          "type": "Reference<SpawnBracket>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CustomRole",
+      "source": "Code/MethodSystem/Methods/CustomRoleMethods/CRole_CreateBracketSpawnSystemMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "CRole.CreateChanceSpawnSystem",
+      "description": "Creates a spawn system for a custom role using a simple chance.",
+      "arguments": [
+        {
+          "name": "role to replace",
+          "type": "Enum<RoleTypeId>"
+        },
+        {
+          "name": "replacement chance",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CustomRole",
+      "source": "Code/MethodSystem/Methods/CustomRoleMethods/CRole_CreateChanceSpawnSystemMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "CRole.CreateProceduralSpawnSystem",
+      "description": "Creates a procedural spawn system for a custom role.",
+      "arguments": [
+        {
+          "name": "role to replace",
+          "type": "Enum<RoleTypeId>"
+        },
+        {
+          "name": "per-player spawn chance",
+          "type": "Float"
+        },
+        {
+          "name": "conversion limit",
+          "type": "Int"
+        },
+        {
+          "name": "minimum required players",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CustomRole",
+      "source": "Code/MethodSystem/Methods/CustomRoleMethods/CRole_CreateProceduralSpawnSystemMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "CRole.CreateSpawnBracket",
+      "description": "Creates a spawn bracket for a the bracket spawn system.",
+      "arguments": [
+        {
+          "name": "lower bound",
+          "type": "Int"
+        },
+        {
+          "name": "upper bound",
+          "type": "Int"
+        },
+        {
+          "name": "amount to spawn",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CustomRole",
+      "source": "Code/MethodSystem/Methods/CustomRoleMethods/CRole_CreateSpawnBracketMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "CRole.IsRegistered",
+      "description": "Checks if a given custom role is registered.",
+      "arguments": [
+        {
+          "name": "role id",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CustomRole",
+      "source": "Code/MethodSystem/Methods/CustomRoleMethods/CRole_IsRegisteredMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "CRole.Register",
+      "description": "Registers a custom role.",
+      "arguments": [
+        {
+          "name": "id",
+          "type": "Text"
+        },
+        {
+          "name": "display name",
+          "type": "Text"
+        },
+        {
+          "name": "role type",
+          "type": "Enum<RoleTypeId>"
+        },
+        {
+          "name": "spawn system",
+          "type": "Reference<CustomRoleSpawnSystem>"
+        },
+        {
+          "name": "remove role on death",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CustomRole",
+      "source": "Code/MethodSystem/Methods/CustomRoleMethods/CRole_RegisterMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "CRole.Set",
+      "description": "Assigns a custom role to a player.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "custom role",
+          "type": "CustomRole"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CustomRole",
+      "source": "Code/MethodSystem/Methods/CustomRoleMethods/CRole_SetMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "CRole.SetCallbacks",
+      "description": "Sets the callbacks for a provided custom role.",
+      "arguments": [
+        {
+          "name": "custom role",
+          "type": "CustomRole"
+        },
+        {
+          "name": "on spawning",
+          "type": "Callback"
+        },
+        {
+          "name": "on removing",
+          "type": "Callback"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CustomRole",
+      "source": "Code/MethodSystem/Methods/CustomRoleMethods/CRole_SetCallbacksMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "CRole.Unregister",
+      "description": "Unregisters a given custom role from the server.",
+      "arguments": [
+        {
+          "name": "custom role",
+          "type": "CustomRole"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "CustomRole",
+      "source": "Code/MethodSystem/Methods/CustomRoleMethods/CRole_UnregisterMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "AddDamageRule",
+      "description": "Sets the damage rule for a player.",
+      "arguments": [
+        {
+          "name": "mode",
+          "type": "Options"
+        },
+        {
+          "name": "players affected",
+          "type": "Players"
+        },
+        {
+          "name": "multiplier",
+          "type": "Float"
+        },
+        {
+          "name": "remove id",
+          "type": "Text"
+        },
+        {
+          "name": "update",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "DamageRule",
+      "source": "Code/MethodSystem/Methods/DamageRuleMethods/AddDamageRuleMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "RemoveDamageRule",
+      "description": "Removes a given damage rule fro applying.",
+      "arguments": [
+        {
+          "name": "id to remove",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "DamageRule",
+      "source": "Code/MethodSystem/Methods/DamageRuleMethods/RemoveDamageRuleMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "DB.Add",
+      "description": "Adds or overwrites a key-value pair into the database.",
+      "arguments": [
+        {
+          "name": "database",
+          "type": "Database"
+        },
+        {
+          "name": "key",
+          "type": "Text"
+        },
+        {
+          "name": "value",
+          "type": "AnyValue"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Database",
+      "source": "Code/MethodSystem/Methods/DatabaseMethods/DB_AddMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "DB.Contains",
+      "description": "Returns true if the provided key exists in the database.",
+      "arguments": [
+        {
+          "name": "database",
+          "type": "Database"
+        },
+        {
+          "name": "key",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Database",
+      "source": "Code/MethodSystem/Methods/DatabaseMethods/DB_ContainsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "DB.Create",
+      "description": "Creates a new JSON file in the database folder.",
+      "arguments": [
+        {
+          "name": "name",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Database",
+      "source": "Code/MethodSystem/Methods/DatabaseMethods/DB_CreateMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "DB.Exists",
+      "description": "Returns true if the provided database exists.",
+      "arguments": [
+        {
+          "name": "database name",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Database",
+      "source": "Code/MethodSystem/Methods/DatabaseMethods/DB_ExistsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "DB.Get",
+      "description": "Returns the value of a given key in the database.",
+      "arguments": [
+        {
+          "name": "database",
+          "type": "Database"
+        },
+        {
+          "name": "key",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Database",
+      "source": "Code/MethodSystem/Methods/DatabaseMethods/DB_GetMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "DB.Remove",
+      "description": "Removes a key from a database.",
+      "arguments": [
+        {
+          "name": "database",
+          "type": "Database"
+        },
+        {
+          "name": "key",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Database",
+      "source": "Code/MethodSystem/Methods/DatabaseMethods/DB_RemoveMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Dict.Add",
+      "description": "Adds a key-value pair to a dictionary.",
+      "arguments": [
+        {
+          "name": "dictionary",
+          "type": "Reference<Dict>"
+        },
+        {
+          "name": "key",
+          "type": "AnyValue"
+        },
+        {
+          "name": "value",
+          "type": "AnyValue"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Dictionary",
+      "source": "Code/MethodSystem/Methods/DictionaryMethods/Dict_AddMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Dict.Contains",
+      "description": "Returns true if the dictionary contains the provided key",
+      "arguments": [
+        {
+          "name": "dictionary",
+          "type": "Reference<Dict>"
+        },
+        {
+          "name": "key",
+          "type": "AnyValue"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Dictionary",
+      "source": "Code/MethodSystem/Methods/DictionaryMethods/Dict_ContainsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Dict.Create",
+      "description": "Creates an empty dictionary.",
+      "arguments": [],
+      "aliases": [],
+      "subgroup": "Dictionary",
+      "source": "Code/MethodSystem/Methods/DictionaryMethods/Dict_CreateMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Dict.Get",
+      "description": "Gets a value associated with a key from a dictionary.",
+      "arguments": [
+        {
+          "name": "dictionary",
+          "type": "Reference<Dict>"
+        },
+        {
+          "name": "key",
+          "type": "AnyValue"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Dictionary",
+      "source": "Code/MethodSystem/Methods/DictionaryMethods/Dict_GetMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Dict.Remove",
+      "description": "Removes a key-value pair from a dictionary.",
+      "arguments": [
+        {
+          "name": "dictionary",
+          "type": "Reference<Dict>"
+        },
+        {
+          "name": "key to remove",
+          "type": "AnyValue"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Dictionary",
+      "source": "Code/MethodSystem/Methods/DictionaryMethods/Dict_RemoveMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Discord.CreateMessage",
+      "description": "Creates a discord message object.",
+      "arguments": [
+        {
+          "name": "message content",
+          "type": "Text"
+        },
+        {
+          "name": "sender name",
+          "type": "Text"
+        },
+        {
+          "name": "sender avatar url",
+          "type": "Text"
+        },
+        {
+          "name": "embeds",
+          "type": "Reference<Embed_CreateMethod.DEmbed>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Discord",
+      "source": "Code/MethodSystem/Methods/DiscordMethods/Discord_CreateMessageMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Discord.DeleteMessage",
+      "description": "Deletes a message sent by a discord webhook (with that same webhook).",
+      "arguments": [
+        {
+          "name": "webhook url",
+          "type": "Text"
+        },
+        {
+          "name": "message id",
+          "type": "Text"
+        },
+        {
+          "name": "thread id",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Discord",
+      "source": "Code/MethodSystem/Methods/DiscordMethods/Discord_DeleteMessageMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Discord.EditMessage",
+      "description": "Edits a message sent by a discord webhook (with that same webhook).",
+      "arguments": [
+        {
+          "name": "webhook url",
+          "type": "Text"
+        },
+        {
+          "name": "message id",
+          "type": "Text"
+        },
+        {
+          "name": "message object",
+          "type": "Reference<Discord_CreateMessageMethod.DMessage>"
+        },
+        {
+          "name": "thread id",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Discord",
+      "source": "Code/MethodSystem/Methods/DiscordMethods/Discord_EditMessageMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Discord.SendMessage",
+      "description": "Sends a message using a discord webhook.",
+      "arguments": [
+        {
+          "name": "webhook url",
+          "type": "Text"
+        },
+        {
+          "name": "message object",
+          "type": "Reference<Discord_CreateMessageMethod.DMessage>"
+        },
+        {
+          "name": "thread id",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Discord",
+      "source": "Code/MethodSystem/Methods/DiscordMethods/Discord_SendMessageMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Discord.SendMessageAndWait",
+      "description": "Sends a message using a discord webhook and waits until it is completed. Returns the message id.",
+      "arguments": [
+        {
+          "name": "webhook url",
+          "type": "Text"
+        },
+        {
+          "name": "message object",
+          "type": "Reference<Discord_CreateMessageMethod.DMessage>"
+        },
+        {
+          "name": "thread id",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Discord",
+      "source": "Code/MethodSystem/Methods/DiscordMethods/Discord_SendMessageAndWaitMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Embed.Create",
+      "description": "Creates an embed which can later be sent to discord via webhook.",
+      "arguments": [
+        {
+          "name": "title",
+          "type": "Text"
+        },
+        {
+          "name": "description",
+          "type": "Text"
+        },
+        {
+          "name": "color",
+          "type": "Color"
+        },
+        {
+          "name": "author",
+          "type": "Reference<Embed_CreateAuthorMethod.DEmbedAuthor>"
+        },
+        {
+          "name": "footer",
+          "type": "Reference<Embed_CreateFooterMethod.DEmbedFooter>"
+        },
+        {
+          "name": "thumbnail url",
+          "type": "Text"
+        },
+        {
+          "name": "image url",
+          "type": "Text"
+        },
+        {
+          "name": "clickable url",
+          "type": "Text"
+        },
+        {
+          "name": "fields",
+          "type": "Reference<Embed_CreateFieldMethod.DEmbedField>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Discord",
+      "source": "Code/MethodSystem/Methods/DiscordMethods/Embed_CreateMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Embed.CreateAuthor",
+      "description": "Creates an author object that can be used in discord embeds.",
+      "arguments": [
+        {
+          "name": "name",
+          "type": "Text"
+        },
+        {
+          "name": "icon url",
+          "type": "Text"
+        },
+        {
+          "name": "clickable url",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Discord",
+      "source": "Code/MethodSystem/Methods/DiscordMethods/Embed_CreateAuthorMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Embed.CreateField",
+      "description": "Creates a field object that can be used in discord embeds.",
+      "arguments": [
+        {
+          "name": "name",
+          "type": "Text"
+        },
+        {
+          "name": "value",
+          "type": "Text"
+        },
+        {
+          "name": "inline",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Discord",
+      "source": "Code/MethodSystem/Methods/DiscordMethods/Embed_CreateFieldMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Embed.CreateFooter",
+      "description": "Creates a footer that can be used in discord embeds.",
+      "arguments": [
+        {
+          "name": "content",
+          "type": "Text"
+        },
+        {
+          "name": "icon url",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Discord",
+      "source": "Code/MethodSystem/Methods/DiscordMethods/Embed_CreateFooterMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "BreakDoor",
+      "description": "Breaks specified doors if possible.",
+      "arguments": [
+        {
+          "name": "doors",
+          "type": "Doors"
+        },
+        {
+          "name": "damage type",
+          "type": "Enum<DoorDamageType>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Door",
+      "source": "Code/MethodSystem/Methods/DoorMethods/BreakDoorMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "CloseDoor",
+      "description": "Closes doors.",
+      "arguments": [
+        {
+          "name": "doors",
+          "type": "Doors"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Door",
+      "source": "Code/MethodSystem/Methods/DoorMethods/CloseDoorMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "GetRandomDoor",
+      "description": "Returns a reference to a random door.",
+      "arguments": [],
+      "aliases": [],
+      "subgroup": "Door",
+      "source": "Code/MethodSystem/Methods/DoorMethods/GetRandomDoorMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "LockDoor",
+      "description": "Locks doors.",
+      "arguments": [
+        {
+          "name": "doors",
+          "type": "Doors"
+        },
+        {
+          "name": "lock",
+          "type": "Enum<DoorLockReason>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Door",
+      "source": "Code/MethodSystem/Methods/DoorMethods/LockDoorMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "OpenDoor",
+      "description": "Opens doors.",
+      "arguments": [
+        {
+          "name": "doors",
+          "type": "Doors"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Door",
+      "source": "Code/MethodSystem/Methods/DoorMethods/OpenDoorMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "PryGate",
+      "description": "Pries a gate.",
+      "arguments": [
+        {
+          "name": "gate",
+          "type": "Gate"
+        },
+        {
+          "name": "should play effects",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Door",
+      "source": "Code/MethodSystem/Methods/DoorMethods/PryGateMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "RepairDoor",
+      "description": "Repairs specified doors if possible",
+      "arguments": [
+        {
+          "name": "doors to repair",
+          "type": "Doors"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Door",
+      "source": "Code/MethodSystem/Methods/DoorMethods/RepairDoorMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetDoorHealth",
+      "description": "Sets remaining health for specified doors if possible",
+      "arguments": [
+        {
+          "name": "doors",
+          "type": "Doors"
+        },
+        {
+          "name": "health",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Door",
+      "source": "Code/MethodSystem/Methods/DoorMethods/SetDoorHealthMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetDoorMaxHealth",
+      "description": "Sets max health for specified doors if possible",
+      "arguments": [
+        {
+          "name": "doors",
+          "type": "Doors"
+        },
+        {
+          "name": "max health",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Door",
+      "source": "Code/MethodSystem/Methods/DoorMethods/SetDoorMaxHealthMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetDoorPermission",
+      "description": "Sets door permissions.",
+      "arguments": [
+        {
+          "name": "doors",
+          "type": "Doors"
+        },
+        {
+          "name": "permissions",
+          "type": "Enum<DoorPermissionFlags>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Door",
+      "source": "Code/MethodSystem/Methods/DoorMethods/SetDoorPermissionMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "UnlockDoor",
+      "description": "Unlocks doors.",
+      "arguments": [
+        {
+          "name": "doors",
+          "type": "Doors"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Door",
+      "source": "Code/MethodSystem/Methods/DoorMethods/UnlockDoorMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "AddDummy",
+      "description": "Adds a dummy to the server",
+      "arguments": [
+        {
+          "name": "name",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Dummy",
+      "source": "Code/MethodSystem/Methods/DummyMethods/AddDummyMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "DestroyDummy",
+      "description": "Destroys a dummy off of the server.",
+      "arguments": [
+        {
+          "name": "dummies to destroy",
+          "type": "Players"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Dummy",
+      "source": "Code/MethodSystem/Methods/DummyMethods/DestroyDummyMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ClearEffect",
+      "description": "Removes the provided status effect from players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "effect",
+          "type": "EffectType"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Effect",
+      "source": "Code/MethodSystem/Methods/EffectMethods/ClearEffectMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "GiveEffect",
+      "description": "Adds a provided effect for specified players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "effect",
+          "type": "EffectType"
+        },
+        {
+          "name": "duration",
+          "type": "Duration"
+        },
+        {
+          "name": "intensity",
+          "type": "Int"
+        },
+        {
+          "name": "add duration if active",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Effect",
+      "source": "Code/MethodSystem/Methods/EffectMethods/GiveEffectMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "HasEffect",
+      "description": "Returns true or false indicating if the player has the provided effect.",
+      "arguments": [
+        {
+          "name": "player",
+          "type": "Player"
+        },
+        {
+          "name": "effect",
+          "type": "EffectType"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Effect",
+      "source": "Code/MethodSystem/Methods/EffectMethods/HasEffectMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "LockElevator",
+      "description": "Locks elevators.",
+      "arguments": [
+        {
+          "name": "elevators",
+          "type": "Elevators"
+        },
+        {
+          "name": "lockReason",
+          "type": "Enum<DoorLockReason>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Elevator",
+      "source": "Code/MethodSystem/Methods/ElevatorMethods/LockElevatorMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SendElevator",
+      "description": "Sends elevators to the next floor.",
+      "arguments": [
+        {
+          "name": "elevators",
+          "type": "Elevators"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Elevator",
+      "source": "Code/MethodSystem/Methods/ElevatorMethods/SendElevatorMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetElevatorText",
+      "description": "Changes the text on the elevator panels between LCZ and HCZ.",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Elevator",
+      "source": "Code/MethodSystem/Methods/ElevatorMethods/SetElevatorTextMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "UnlockElevator",
+      "description": "Unlocks elevators.",
+      "arguments": [
+        {
+          "name": "elevators",
+          "type": "Elevators"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Elevator",
+      "source": "Code/MethodSystem/Methods/ElevatorMethods/UnlockElevatorMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "AddEventHandler",
+      "description": "Adds an event handler to the provided event.",
+      "arguments": [
+        {
+          "name": "event name",
+          "type": "Event"
+        },
+        {
+          "name": "callback",
+          "type": "Callback"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Event",
+      "source": "Code/MethodSystem/Methods/EventMethods/AddEventHandlerMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "DisableEvent",
+      "description": "Disables the provided event from running.",
+      "arguments": [
+        {
+          "name": "eventName",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Event",
+      "source": "Code/MethodSystem/Methods/EventMethods/DisableEventMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "EnableEvent",
+      "description": "Enables the provided event to run after being disabled.",
+      "arguments": [
+        {
+          "name": "eventName",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Event",
+      "source": "Code/MethodSystem/Methods/EventMethods/EnableEventMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "IsAllowed",
+      "description": "Sets whether or not the event is allowed to run.",
+      "arguments": [
+        {
+          "name": "isAllowed",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Event",
+      "source": "Code/MethodSystem/Methods/EventMethods/IsAllowedMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "AddHume",
+      "description": "Adds hume shield to players. Do not confuse this method with {nameof(SetHumeShieldMethod)}",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "amount",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Health",
+      "source": "Code/MethodSystem/Methods/HealthMethods/AddHumeMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Damage",
+      "description": "Damages players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "amount",
+          "type": "Float"
+        },
+        {
+          "name": "reason",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Health",
+      "source": "Code/MethodSystem/Methods/HealthMethods/DamageMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Heal",
+      "description": "Heals players. Doesn't exceed their max health.",
+      "arguments": [
+        {
+          "name": "players to heal",
+          "type": "Players"
+        },
+        {
+          "name": "amount",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Health",
+      "source": "Code/MethodSystem/Methods/HealthMethods/HealMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Kill",
+      "description": "Kills players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "reason",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Health",
+      "source": "Code/MethodSystem/Methods/HealthMethods/KillMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetAHP",
+      "description": "Sets the amount of AHP for players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "amount",
+          "type": "Float"
+        },
+        {
+          "name": "limit",
+          "type": "Float"
+        },
+        {
+          "name": "decay",
+          "type": "Float"
+        },
+        {
+          "name": "efficacy",
+          "type": "Float"
+        },
+        {
+          "name": "sustain",
+          "type": "Duration"
+        },
+        {
+          "name": "isPersistent",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Health",
+      "source": "Code/MethodSystem/Methods/HealthMethods/SetAHPMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetHealth",
+      "description": "Sets health for players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "health",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Health",
+      "source": "Code/MethodSystem/Methods/HealthMethods/SetHealthMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetHumeShield",
+      "description": "Sets hume shield for players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "amount",
+          "type": "Float"
+        },
+        {
+          "name": "limit",
+          "type": "Float"
+        },
+        {
+          "name": "regen rate",
+          "type": "Float"
+        },
+        {
+          "name": "regen cooldown",
+          "type": "Duration"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Health",
+      "source": "Code/MethodSystem/Methods/HealthMethods/SetHumeShieldMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetMaxHealth",
+      "description": "Sets the max health of players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "maxHealth",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Health",
+      "source": "Code/MethodSystem/Methods/HealthMethods/SetMaxHealthMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetRegeneration",
+      "description": "Adds health regeneration to players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "regeneration rate",
+          "type": "Float"
+        },
+        {
+          "name": "regeneration duration",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Health",
+      "source": "Code/MethodSystem/Methods/HealthMethods/SetRegenerationMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "HTTP.Get",
+      "description": "Sends a GET request to a provided URL and returns the response as a JSON object.",
+      "arguments": [
+        {
+          "name": "address",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "HTTP",
+      "source": "Code/MethodSystem/Methods/HTTPMethods/HTTP_GetMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "HTTP.Patch",
+      "description": "Sends a PATCH request to a provided URL.",
+      "arguments": [
+        {
+          "name": "address",
+          "type": "Text"
+        },
+        {
+          "name": "json data to patch",
+          "type": "Reference<JObject>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "HTTP",
+      "source": "Code/MethodSystem/Methods/HTTPMethods/HTTP_PatchMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "HTTP.Post",
+      "description": "Sends a POST request to a provided URL.",
+      "arguments": [
+        {
+          "name": "address",
+          "type": "Text"
+        },
+        {
+          "name": "json data to post",
+          "type": "Reference<JObject>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "HTTP",
+      "source": "Code/MethodSystem/Methods/HTTPMethods/HTTP_PostMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "JSON.Add",
+      "description": "Adds a key-value pair to a JSON object.",
+      "arguments": [
+        {
+          "name": "JSON to add value to",
+          "type": "Reference<JObject>"
+        },
+        {
+          "name": "key",
+          "type": "Text"
+        },
+        {
+          "name": "value",
+          "type": "Value<LiteralValue>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "HTTP",
+      "source": "Code/MethodSystem/Methods/HTTPMethods/JSON_AddMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "JSON.Create",
+      "description": "Returns an empty JSON object.",
+      "arguments": [],
+      "aliases": [],
+      "subgroup": "HTTP",
+      "source": "Code/MethodSystem/Methods/HTTPMethods/JSON_CreateMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "JSON.FormatToReadable",
+      "description": "Returns the JSON object in a readable format.",
+      "arguments": [
+        {
+          "name": "JSON object",
+          "type": "Reference<JObject>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "HTTP",
+      "source": "Code/MethodSystem/Methods/HTTPMethods/JSON_FormatToReadableMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "JSON.Parse",
+      "description": "Parses a provided value into a JSON object.",
+      "arguments": [
+        {
+          "name": "string representation of JSON object",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "HTTP",
+      "source": "Code/MethodSystem/Methods/HTTPMethods/JSON_ParseMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "IntercomInfo",
+      "description": "Returns info about the Intercom.",
+      "arguments": [
+        {
+          "name": "mode",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Intercom",
+      "source": "Code/MethodSystem/Methods/IntercomMethods/IntercomInfoMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetIntercomState",
+      "description": "Sets the state of usage of the intercom.",
+      "arguments": [
+        {
+          "name": "state",
+          "type": "Enum<IntercomState>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Intercom",
+      "source": "Code/MethodSystem/Methods/IntercomMethods/SetIntercomStateMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetIntercomText",
+      "description": "Sets the text on the Intercom.",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Intercom",
+      "source": "Code/MethodSystem/Methods/IntercomMethods/SetIntercomTextMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "AdvDestroyItem",
+      "description": "Destroys items on the ground and in inventories.",
+      "arguments": [
+        {
+          "name": "items",
+          "type": "Items"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Item",
+      "source": "Code/MethodSystem/Methods/ItemMethods/AdvDestroyItemMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "AdvDropItem",
+      "description": "Drops an item from player inventory and returns a reference to the pickup object of that item.",
+      "arguments": [
+        {
+          "name": "item",
+          "type": "Reference<Item>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Item",
+      "source": "Code/MethodSystem/Methods/ItemMethods/AdvDropItemMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "AdvGiveItem",
+      "description": "Gives a player a single item, and returns a reference to the item.",
+      "arguments": [
+        {
+          "name": "player to give item",
+          "type": "Player"
+        },
+        {
+          "name": "item type to add",
+          "type": "Enum<ItemType>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Item",
+      "source": "Code/MethodSystem/Methods/ItemMethods/AdvGiveItemMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ClearInventory",
+      "description": "Clears player inventory.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "mode",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Item",
+      "source": "Code/MethodSystem/Methods/ItemMethods/ClearInventoryMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "DestroyItem",
+      "description": "Destroys an item in players' inventory.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "item",
+          "type": "Enum<ItemType>"
+        },
+        {
+          "name": "amount",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Item",
+      "source": "Code/MethodSystem/Methods/ItemMethods/DestroyItemMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "DropItem",
+      "description": "Drops items from players' inventories.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "itemTypeToDrop",
+          "type": "Enum<ItemType>"
+        },
+        {
+          "name": "amountToDrop",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Item",
+      "source": "Code/MethodSystem/Methods/ItemMethods/DropItemMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "FirearmItemInfo",
+      "description": "Returns info about provided firearm",
+      "arguments": [
+        {
+          "name": "firearm",
+          "type": "Reference<FirearmItem>"
+        },
+        {
+          "name": "property",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Item",
+      "source": "Code/MethodSystem/Methods/ItemMethods/FirearmItemInfoMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ForceEquip",
+      "description": "Forces players to equip a provided item.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "item type",
+          "type": "Enum<ItemType>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Item",
+      "source": "Code/MethodSystem/Methods/ItemMethods/ForceEquipMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "GiveCandy",
+      "description": "Gives candy to players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "candyType",
+          "type": "Enum<CandyKindID>"
+        },
+        {
+          "name": "amount",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Item",
+      "source": "Code/MethodSystem/Methods/ItemMethods/GiveCandyMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "GiveItem",
+      "description": "Gives an item to players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "item",
+          "type": "Enum<ItemType>"
+        },
+        {
+          "name": "amount",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Item",
+      "source": "Code/MethodSystem/Methods/ItemMethods/GiveItemMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "GrantLoadout",
+      "description": "Grants players a class loadout.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "roleLoadout",
+          "type": "Enum<RoleTypeId>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Item",
+      "source": "Code/MethodSystem/Methods/ItemMethods/GrantLoadoutMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetRadioRange",
+      "description": "Sets the radio range of a specified radio item.",
+      "arguments": [
+        {
+          "name": "radio",
+          "type": "Reference<RadioItem>"
+        },
+        {
+          "name": "new radio range",
+          "type": "Enum<RadioMessages.RadioRangeLevel>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Item",
+      "source": "Code/MethodSystem/Methods/ItemMethods/SetRadioRangeMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "UsableItemInfo",
+      "description": "Returns information about provided usable item, like Painkillers, Medkit, etc.",
+      "arguments": [
+        {
+          "name": "usable",
+          "type": "Reference<UsableItem>"
+        },
+        {
+          "name": "property",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Item",
+      "source": "Code/MethodSystem/Methods/ItemMethods/UsableItemInfoMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "DisableLights",
+      "description": "Turns off lights for rooms.",
+      "arguments": [
+        {
+          "name": "rooms",
+          "type": "Rooms"
+        },
+        {
+          "name": "duration",
+          "type": "Duration"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Light",
+      "source": "Code/MethodSystem/Methods/LightMethods/DisableLightsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ResetLightColor",
+      "description": "Resets the light color for rooms.",
+      "arguments": [
+        {
+          "name": "rooms",
+          "type": "Rooms"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Light",
+      "source": "Code/MethodSystem/Methods/LightMethods/ResetLightColorMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetLightColor",
+      "description": "Sets the light color for rooms.",
+      "arguments": [
+        {
+          "name": "rooms",
+          "type": "Rooms"
+        },
+        {
+          "name": "color",
+          "type": "Color"
+        },
+        {
+          "name": "intensity",
+          "type": "Float"
+        },
+        {
+          "name": "transition duration",
+          "type": "Duration"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Light",
+      "source": "Code/MethodSystem/Methods/LightMethods/SetLightColorMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "CleanupPickups",
+      "description": "Cleans pickups (items) from the map.",
+      "arguments": [],
+      "aliases": [],
+      "subgroup": "Map",
+      "source": "Code/MethodSystem/Methods/MapMethods/CleanupPickupsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "CleanupRagdolls",
+      "description": "Destroys ragdolls.",
+      "arguments": [
+        {
+          "name": "roleToRemove",
+          "type": "Enum<RoleTypeId>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Map",
+      "source": "Code/MethodSystem/Methods/MapMethods/CleanupRagdollsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "CreateRagdoll",
+      "description": "Spawns a ragdoll.",
+      "arguments": [
+        {
+          "name": "role",
+          "type": "Enum<RoleTypeId>"
+        },
+        {
+          "name": "name",
+          "type": "Text"
+        },
+        {
+          "name": "x position",
+          "type": "Float"
+        },
+        {
+          "name": "y position",
+          "type": "Float"
+        },
+        {
+          "name": "z position",
+          "type": "Float"
+        },
+        {
+          "name": "x size",
+          "type": "Float"
+        },
+        {
+          "name": "y size",
+          "type": "Float"
+        },
+        {
+          "name": "z size",
+          "type": "Float"
+        },
+        {
+          "name": "x rotation",
+          "type": "Float"
+        },
+        {
+          "name": "y rotation",
+          "type": "Float"
+        },
+        {
+          "name": "z rotation",
+          "type": "Float"
+        },
+        {
+          "name": "w rotation",
+          "type": "Float"
+        },
+        {
+          "name": "damage handler",
+          "type": "AnyValue"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Map",
+      "source": "Code/MethodSystem/Methods/MapMethods/CreateRagdollMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Decontamination",
+      "description": "Controls the LCZ decontamination.",
+      "arguments": [
+        {
+          "name": "mode",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Map",
+      "source": "Code/MethodSystem/Methods/MapMethods/DecontaminationMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "DecontaminationInfo",
+      "description": "Returns decontamination info.",
+      "arguments": [
+        {
+          "name": "option",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Map",
+      "source": "Code/MethodSystem/Methods/MapMethods/DecontaminationInfoMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "GetFromMap",
+      "description": "Gets a collection of objects from a map.",
+      "arguments": [
+        {
+          "name": "object",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Map",
+      "source": "Code/MethodSystem/Methods/MapMethods/GetFromMapMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "GetPickups",
+      "description": "Returns a collection of references to pickups.",
+      "arguments": [],
+      "aliases": [],
+      "subgroup": "Map",
+      "source": "Code/MethodSystem/Methods/MapMethods/GetPickupsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Chance",
+      "description": "Returns true with the specified chance.",
+      "arguments": [
+        {
+          "name": "chance",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Number",
+      "source": "Code/MethodSystem/Methods/NumberMethods/ChanceMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "HexToInt",
+      "description": "Parses a hexadecimal number back to a number value",
+      "arguments": [
+        {
+          "name": "hex number",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Number",
+      "source": "Code/MethodSystem/Methods/NumberMethods/HexToIntMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "IntToHex",
+      "description": "Parses an integer into a hexadecimal number",
+      "arguments": [
+        {
+          "name": "integer to parse",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Number",
+      "source": "Code/MethodSystem/Methods/NumberMethods/IntToHexMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Random",
+      "description": "Returns a randomly generated number.",
+      "arguments": [
+        {
+          "name": "startingNum",
+          "type": "Float"
+        },
+        {
+          "name": "endingNum",
+          "type": "Float"
+        },
+        {
+          "name": "numberType",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Number",
+      "source": "Code/MethodSystem/Methods/NumberMethods/RandomMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Round",
+      "description": "Rounds a provided number.",
+      "arguments": [
+        {
+          "name": "number to round",
+          "type": "Float"
+        },
+        {
+          "name": "decimal places",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Number",
+      "source": "Code/MethodSystem/Methods/NumberMethods/RoundMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Error",
+      "description": "Sends an error message.",
+      "arguments": [
+        {
+          "name": "error",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Output",
+      "source": "Code/MethodSystem/Methods/OutputMethods/ErrorMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Print",
+      "description": "Prints the text provided to the server console.",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "Text"
+        },
+        {
+          "name": "color",
+          "type": "Enum<ConsoleColor>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Output",
+      "source": "Code/MethodSystem/Methods/OutputMethods/PrintMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Reply",
+      "description": "Sends a message to the place where the script was run from.",
+      "arguments": [
+        {
+          "name": "message",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Output",
+      "source": "Code/MethodSystem/Methods/OutputMethods/ReplyMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "AddPickupToInventory",
+      "description": "Forces a pickup to be added to the player's inventory.",
+      "arguments": [
+        {
+          "name": "player",
+          "type": "Player"
+        },
+        {
+          "name": "pickup",
+          "type": "Reference<Pickup>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Pickup",
+      "source": "Code/MethodSystem/Methods/PickupMethods/AddPickupToInventoryMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "CreateGrenade",
+      "description": "Creates a new grenade projectile to later spawn.",
+      "arguments": [
+        {
+          "name": "grenade type",
+          "type": "Options"
+        },
+        {
+          "name": "attacker",
+          "type": "Player"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Pickup",
+      "source": "Code/MethodSystem/Methods/PickupMethods/CreateGrenadeMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "CreatePickup",
+      "description": "Creates a new item pickup to later spawn.",
+      "arguments": [
+        {
+          "name": "item type",
+          "type": "Enum<ItemType>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Pickup",
+      "source": "Code/MethodSystem/Methods/PickupMethods/CreatePickupMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "DestroyPickup",
+      "description": "Destroys a pickup / grenade from the map.",
+      "arguments": [
+        {
+          "name": "pickup/projectile reference",
+          "type": "Reference<Pickup>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Pickup",
+      "source": "Code/MethodSystem/Methods/PickupMethods/DestroyPickupMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "PickupExists",
+      "description": "Returns true if the provided pickup is still present on the server.",
+      "arguments": [
+        {
+          "name": "pickup reference",
+          "type": "Reference<Pickup>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Pickup",
+      "source": "Code/MethodSystem/Methods/PickupMethods/PickupExistsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SpawnPickupPlayer",
+      "description": "Spawns an item pickup / grenade on a player.",
+      "arguments": [
+        {
+          "name": "pickup/projectile reference",
+          "type": "Reference<Pickup>"
+        },
+        {
+          "name": "player to spawn pickup on",
+          "type": "Player"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Pickup",
+      "source": "Code/MethodSystem/Methods/PickupMethods/SpawnPickupPlayerMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SpawnPickupPos",
+      "description": "Spawns an item pickup / grenade at the coordinates.",
+      "arguments": [
+        {
+          "name": "pickup/projectile reference",
+          "type": "Reference<Pickup>"
+        },
+        {
+          "name": "x position",
+          "type": "Float"
+        },
+        {
+          "name": "y position",
+          "type": "Float"
+        },
+        {
+          "name": "z position",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Pickup",
+      "source": "Code/MethodSystem/Methods/PickupMethods/SpawnPickupPosMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SpawnPickupRoom",
+      "description": "Spawns an item pickup / grenade in a room.",
+      "arguments": [
+        {
+          "name": "pickup/projectile reference",
+          "type": "Reference<Pickup>"
+        },
+        {
+          "name": "room to spawn pickup in",
+          "type": "Room"
+        },
+        {
+          "name": "relative x",
+          "type": "Float"
+        },
+        {
+          "name": "relative y",
+          "type": "Float"
+        },
+        {
+          "name": "relative z",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Pickup",
+      "source": "Code/MethodSystem/Methods/PickupMethods/SpawnPickupRoomMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Ban",
+      "description": "Bans players from the server.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "duration",
+          "type": "Duration"
+        },
+        {
+          "name": "reason",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/BanMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Explode",
+      "description": "Explodes players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/ExplodeMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "GetAmmoLimit",
+      "description": "Gets the player's limit on a certain ammunition type",
+      "arguments": [
+        {
+          "name": "player to get the limit from",
+          "type": "Player"
+        },
+        {
+          "name": "ammo type",
+          "type": "Enum<AmmoType>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/GetAmmoLimitMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "GetIPInfo",
+      "description": "Fetches information about a provided player IP address using ProxyCheck.io.",
+      "arguments": [
+        {
+          "name": "player",
+          "type": "Player"
+        },
+        {
+          "name": "apiKey",
+          "type": "Text"
+        }
+      ],
+      "aliases": [
+        "Fetches information about a provided player IP address using ProxyCheck.io."
+      ],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/GetIPInfoMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "HasPermission",
+      "description": "Checks if a player has a specific permission.",
+      "arguments": [
+        {
+          "name": "player",
+          "type": "Player"
+        },
+        {
+          "name": "permissions",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/HasPermissionMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Jump",
+      "description": "Makes players jump (with modifiable jump strength).",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "jump strength",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/JumpMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Kick",
+      "description": "Kicks players from the server.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "reason",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/KickMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Mute",
+      "description": "Mutes specified players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "is temporary",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/MuteMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ResetMute",
+      "description": "Resets mute status for specified players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "revoke permament",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/ResetMuteMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetAmmoLimit",
+      "description": "Sets the players' limit on a certain ammunition type",
+      "arguments": [
+        {
+          "name": "players to set the limit to",
+          "type": "Players"
+        },
+        {
+          "name": "ammo type",
+          "type": "Enum<AmmoType>"
+        },
+        {
+          "name": "limit",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/SetAmmoLimitMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetAppearance",
+      "description": "Changes the appearance of a player (or reskins)",
+      "arguments": [
+        {
+          "name": "players whose appearance will be changed",
+          "type": "Players"
+        },
+        {
+          "name": "role to change appearance to",
+          "type": "Enum<RoleTypeId>"
+        },
+        {
+          "name": "players who will see the change",
+          "type": "Players"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/SetAppearanceMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetBypass",
+      "description": "Grants or removes bypass mode for players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "mode",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/SetBypassMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetCustomInfo",
+      "description": "Sets custom info (overhead text) for specific players.",
+      "arguments": [
+        {
+          "name": "playersToAffect",
+          "type": "Players"
+        },
+        {
+          "name": "customInfoText",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/SetCustomInfoMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetDisplayName",
+      "description": "Sets display name for specified players",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "display name",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/SetDisplayNameMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetEmote",
+      "description": "Sets emotion for specified players",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "emotion",
+          "type": "Enum<EmotionPresetType>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/SetEmoteMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetGodMode",
+      "description": "Enables or disables godmode for specified players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "mode",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/SetGodModeMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetGravity",
+      "description": "Changes player gravity.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "gravity",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/SetGravityMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetGroup",
+      "description": "Sets or removes group from specified players",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "group",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/SetGroupMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetNoclip",
+      "description": "Enables or disables access to noclip for specified players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "isAllowed",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/SetNoclipMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetRole",
+      "description": "Sets a role for players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "newRole",
+          "type": "Enum<RoleTypeId>"
+        },
+        {
+          "name": "spawnFlags",
+          "type": "Enum<RoleSpawnFlags>"
+        },
+        {
+          "name": "reason",
+          "type": "Enum<RoleChangeReason>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/SetRoleMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetShownPlayerInfo",
+      "description": "Sets what information about the player is shown.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "info to show",
+          "type": "Enum<PlayerInfoArea>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/SetShownPlayerInfoMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetSize",
+      "description": "Sets the size of players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "x size",
+          "type": "Float"
+        },
+        {
+          "name": "y size",
+          "type": "Float"
+        },
+        {
+          "name": "z size",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/SetSizeMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetSpectatability",
+      "description": "Allows or disallows a player to be spectated.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "new state",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/SetSpectatabilityMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Show",
+      "description": "Formats provided players into a nice text representation.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "property",
+          "type": "Enum<PlayerValue.PlayerProperty>"
+        },
+        {
+          "name": "separator",
+          "type": "Text"
+        },
+        {
+          "name": "separator on beginning",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/ShowMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ShowHitMarker",
+      "description": "Shows a hit marker to players.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "hitmarker size",
+          "type": "Float"
+        },
+        {
+          "name": "should play audio",
+          "type": "Bool"
+        },
+        {
+          "name": "hitmarker type",
+          "type": "Enum<HitmarkerType>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/ShowHitMarkerMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Stamina",
+      "description": "Control the stamina of players.",
+      "arguments": [
+        {
+          "name": "options",
+          "type": "Options"
+        },
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "stamina value",
+          "type": "Float"
+        },
+        {
+          "name": "delay stamina regen",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Player",
+      "source": "Code/MethodSystem/Methods/PlayerMethods/StaminaMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ClearPlayerData",
+      "description": "Clears data associated with specified players",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "key to clear",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "PlayerData",
+      "source": "Code/MethodSystem/Methods/PlayerDataMethods/ClearPlayerDataMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "GetPlayerData",
+      "description": "Gets player data from the key.",
+      "arguments": [
+        {
+          "name": "player",
+          "type": "Player"
+        },
+        {
+          "name": "key",
+          "type": "Text"
+        },
+        {
+          "name": "default value",
+          "type": "AnyValue"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "PlayerData",
+      "source": "Code/MethodSystem/Methods/PlayerDataMethods/GetPlayerDataMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "HasPlayerData",
+      "description": "Checks if a given key has an associated value for a given player.",
+      "arguments": [
+        {
+          "name": "player",
+          "type": "Player"
+        },
+        {
+          "name": "key",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "PlayerData",
+      "source": "Code/MethodSystem/Methods/PlayerDataMethods/HasPlayerDataMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetPlayerData",
+      "description": "Associates a custom key with a value for a given player.",
+      "arguments": [
+        {
+          "name": "player",
+          "type": "Player"
+        },
+        {
+          "name": "key",
+          "type": "Text"
+        },
+        {
+          "name": "value to set",
+          "type": "AnyValue"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "PlayerData",
+      "source": "Code/MethodSystem/Methods/PlayerDataMethods/SetPlayerDataMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "AmountOf",
+      "description": "Returns the amount of players in a given player variable.",
+      "arguments": [
+        {
+          "name": "variable",
+          "type": "Players"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "PlayerValue",
+      "source": "Code/MethodSystem/Methods/PlayerValueMethods/AmountOfMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Contains",
+      "description": "Returns a true/false value indicating if the provided player is in the list.",
+      "arguments": [
+        {
+          "name": "player list",
+          "type": "Players"
+        },
+        {
+          "name": "searched player",
+          "type": "Player"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "PlayerValue",
+      "source": "Code/MethodSystem/Methods/PlayerValueMethods/ContainsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Except",
+      "description": "Returns players from the original variable EXCEPT those that were present in other variables.",
+      "arguments": [
+        {
+          "name": "original players",
+          "type": "Players"
+        },
+        {
+          "name": "players to except",
+          "type": "Players"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "PlayerValue",
+      "source": "Code/MethodSystem/Methods/PlayerValueMethods/ExceptMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Filter",
+      "description": "Returns players which match the value for a given property.",
+      "arguments": [
+        {
+          "name": "players to filter",
+          "type": "Players"
+        },
+        {
+          "name": "player property to filter by",
+          "type": "Enum<PlayerValue.PlayerProperty>"
+        },
+        {
+          "name": "desired value of property",
+          "type": "AnyValue"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "PlayerValue",
+      "source": "Code/MethodSystem/Methods/PlayerValueMethods/FilterMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Join",
+      "description": "Returns all players that were provided from multiple player variables.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "PlayerValue",
+      "source": "Code/MethodSystem/Methods/PlayerValueMethods/JoinMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Overlapping",
+      "description": "Checks if provided player variables have the exact same players.",
+      "arguments": [
+        {
+          "name": "first value",
+          "type": "Players"
+        },
+        {
+          "name": "other values",
+          "type": "Players"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "PlayerValue",
+      "source": "Code/MethodSystem/Methods/PlayerValueMethods/OverlappingMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ParsePlayers",
+      "description": "Tries to parse the provided value to a player value.",
+      "arguments": [
+        {
+          "name": "input",
+          "type": "AnyValue"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "PlayerValue",
+      "source": "Code/MethodSystem/Methods/PlayerValueMethods/ParsePlayersMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Take",
+      "description": "Takes a specified amount of players from a player variable, lower or equal to the limit.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "limit",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "PlayerValue",
+      "source": "Code/MethodSystem/Methods/PlayerValueMethods/TakeMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "GetWaveTimer",
+      "description": "Returns the duration of a given spawn wave.",
+      "arguments": [
+        {
+          "name": "wave type",
+          "type": "Wave"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Respawn",
+      "source": "Code/MethodSystem/Methods/RespawnMethods/GetWaveTimerMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "PlayWaveEffect",
+      "description": "Plays a Respawn Wave effect (the NTF helicopter/CI van arrival animation)",
+      "arguments": [
+        {
+          "name": "wave type",
+          "type": "Wave"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Respawn",
+      "source": "Code/MethodSystem/Methods/RespawnMethods/PlayWaveEffectMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SpawnWave",
+      "description": "Forces a wave to start.",
+      "arguments": [
+        {
+          "name": "wave type",
+          "type": "Wave"
+        },
+        {
+          "name": "mode",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Respawn",
+      "source": "Code/MethodSystem/Methods/RespawnMethods/SpawnWaveMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "WaveInfluence",
+      "description": "Changes influence of a wave.",
+      "arguments": [
+        {
+          "name": "wave type",
+          "type": "Wave"
+        },
+        {
+          "name": "mode",
+          "type": "Options"
+        },
+        {
+          "name": "influence",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Respawn",
+      "source": "Code/MethodSystem/Methods/RespawnMethods/WaveInfluenceMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "WaveRespawnTime",
+      "description": "Changes the time left to spawn a wave.",
+      "arguments": [
+        {
+          "name": "wave type",
+          "type": "Wave"
+        },
+        {
+          "name": "mode",
+          "type": "Options"
+        },
+        {
+          "name": "time",
+          "type": "Duration"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Respawn",
+      "source": "Code/MethodSystem/Methods/RespawnMethods/WaveRespawnTimeMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "WaveRespawnTokens",
+      "description": "Changes respawn tokens of a wave.",
+      "arguments": [
+        {
+          "name": "wave type",
+          "type": "Wave"
+        },
+        {
+          "name": "mode",
+          "type": "Options"
+        },
+        {
+          "name": "respawn tokens",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Respawn",
+      "source": "Code/MethodSystem/Methods/RespawnMethods/WaveRespawnTokensMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Blackout",
+      "description": "Blackouts rooms.",
+      "arguments": [
+        {
+          "name": "rooms",
+          "type": "Rooms"
+        },
+        {
+          "name": "duration",
+          "type": "Duration"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Room",
+      "source": "Code/MethodSystem/Methods/RoomMethods/BlackoutMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "GetRoomByName",
+      "description": "Returns a reference to a room which has the provided name.",
+      "arguments": [
+        {
+          "name": "room name",
+          "type": "Enum<RoomName>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Room",
+      "source": "Code/MethodSystem/Methods/RoomMethods/GetRoomByNameMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "EndRound",
+      "description": "Ends a round.",
+      "arguments": [],
+      "aliases": [],
+      "subgroup": "Round",
+      "source": "Code/MethodSystem/Methods/RoundMethods/EndRoundMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "RestartRound",
+      "description": "Restarts the round.",
+      "arguments": [],
+      "aliases": [],
+      "subgroup": "Round",
+      "source": "Code/MethodSystem/Methods/RoundMethods/RestartRoundMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "RoundInfo",
+      "description": "Returns information about the current round.",
+      "arguments": [
+        {
+          "name": "mode",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Round",
+      "source": "Code/MethodSystem/Methods/RoundMethods/RoundInfoMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetLobbyLock",
+      "description": "Changes the lobby lock state.",
+      "arguments": [
+        {
+          "name": "new state",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Round",
+      "source": "Code/MethodSystem/Methods/RoundMethods/SetLobbyLockMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetRoundLock",
+      "description": "Changes the round lock state.",
+      "arguments": [
+        {
+          "name": "new state",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Round",
+      "source": "Code/MethodSystem/Methods/RoundMethods/SetRoundLockMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "StartRound",
+      "description": "Start a round.",
+      "arguments": [],
+      "aliases": [],
+      "subgroup": "Round",
+      "source": "Code/MethodSystem/Methods/RoundMethods/StartRoundMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Get096Targets",
+      "description": "Returns the targets of the specified SCP-096",
+      "arguments": [
+        {
+          "name": "shy guy",
+          "type": "Player"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Scp",
+      "source": "Code/MethodSystem/Methods/ScpMethods/Get096TargetsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Get173Observers",
+      "description": "Returns the people that are looking at the specified SCP-173",
+      "arguments": [
+        {
+          "name": "peanut",
+          "type": "Player"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Scp",
+      "source": "Code/MethodSystem/Methods/ScpMethods/Get173ObserversMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Set079AccessTier",
+      "description": "Sets the Access Tier of the given player(s) if they are SCP-079",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "tier",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Scp",
+      "source": "Code/MethodSystem/Methods/ScpMethods/Set079AccessTierMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Set079AuxPower",
+      "description": "Sets the Auxiliary Power of the given player(s) if they are SCP-079",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "power",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Scp",
+      "source": "Code/MethodSystem/Methods/ScpMethods/Set079AuxPowerMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Set079Exp",
+      "description": "Sets the EXP of the given player(s) if they are SCP-079",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "exp",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Scp",
+      "source": "Code/MethodSystem/Methods/ScpMethods/Set079ExpMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "IsRunning",
+      "description": "Returns true if given script is running",
+      "arguments": [
+        {
+          "name": "script name",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Script",
+      "source": "Code/MethodSystem/Methods/ScriptMethods/IsRunningMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "RunFunc",
+      "description": "Runs a function script with arguments.",
+      "arguments": [
+        {
+          "name": "script to run",
+          "type": "CreatedScript"
+        },
+        {
+          "name": "values to pass",
+          "type": "AnyValue"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Script",
+      "source": "Code/MethodSystem/Methods/ScriptMethods/RunFuncMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "RunScript",
+      "description": "Runs a script.",
+      "arguments": [
+        {
+          "name": "script to create",
+          "type": "CreatedScript"
+        },
+        {
+          "name": "variables to pass",
+          "type": "Variable"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Script",
+      "source": "Code/MethodSystem/Methods/ScriptMethods/RunScriptMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "RunScriptAndWait",
+      "description": "Runs a script and waits until the ran script has finished.",
+      "arguments": [
+        {
+          "name": "script to create",
+          "type": "CreatedScript"
+        },
+        {
+          "name": "variables to pass",
+          "type": "Variable"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Script",
+      "source": "Code/MethodSystem/Methods/ScriptMethods/RunScriptAndWaitMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ScriptExists",
+      "description": "Returns true or false indicating if a script with the provided name exists.",
+      "arguments": [
+        {
+          "name": "script name",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Script",
+      "source": "Code/MethodSystem/Methods/ScriptMethods/ScriptExistsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "StopScript",
+      "description": "Stops a given script.",
+      "arguments": [
+        {
+          "name": "running script",
+          "type": "RunningScript"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Script",
+      "source": "Code/MethodSystem/Methods/ScriptMethods/StopScriptMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ThisInfo",
+      "description": "Returns info about the current script",
+      "arguments": [
+        {
+          "name": "info to receive",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Script",
+      "source": "Code/MethodSystem/Methods/ScriptMethods/ThisInfoMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "TransferVariables",
+      "description": "Makes a copy of the given local variable(s) in a different script.",
+      "arguments": [
+        {
+          "name": "target script",
+          "type": "RunningScript"
+        },
+        {
+          "name": "variables",
+          "type": "Variable"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Script",
+      "source": "Code/MethodSystem/Methods/ScriptMethods/TransferVariablesMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Trigger",
+      "description": "Fires a given trigger, executing scripts which are attached to it.",
+      "arguments": [
+        {
+          "name": "trigger name",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Script",
+      "source": "Code/MethodSystem/Methods/ScriptMethods/TriggerMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ServerInfo",
+      "description": "Returns info about the server.",
+      "arguments": [
+        {
+          "name": "info",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Server",
+      "source": "Code/MethodSystem/Methods/ServerMethods/ServerInfoMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "SetFriendlyFire",
+      "description": "Changes friendly fire mode.",
+      "arguments": [
+        {
+          "name": "enabled?",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Server",
+      "source": "Code/MethodSystem/Methods/ServerMethods/SetFriendlyFireMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "TPDoor",
+      "description": "Teleports players to a door.",
+      "arguments": [
+        {
+          "name": "players to teleport",
+          "type": "Players"
+        },
+        {
+          "name": "door to teleport to",
+          "type": "Door"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Teleport",
+      "source": "Code/MethodSystem/Methods/TeleportMethods/TPDoorMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "TPPlayer",
+      "description": "Teleports players to another player.",
+      "arguments": [
+        {
+          "name": "players to TP",
+          "type": "Players"
+        },
+        {
+          "name": "player target",
+          "type": "Player"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Teleport",
+      "source": "Code/MethodSystem/Methods/TeleportMethods/TPPlayerMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "TPPosition",
+      "description": "Teleports players to an XYZ position.",
+      "arguments": [
+        {
+          "name": "players to TP",
+          "type": "Players"
+        },
+        {
+          "name": "X coordinate",
+          "type": "Float"
+        },
+        {
+          "name": "Y coordinate",
+          "type": "Float"
+        },
+        {
+          "name": "Z coordinate",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Teleport",
+      "source": "Code/MethodSystem/Methods/TeleportMethods/TPPositionMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "TPRoom",
+      "description": "Teleports players to relative coordinates of a room.",
+      "arguments": [
+        {
+          "name": "players to teleport",
+          "type": "Players"
+        },
+        {
+          "name": "room to teleport to",
+          "type": "Room"
+        },
+        {
+          "name": "relative x",
+          "type": "Float"
+        },
+        {
+          "name": "relative y",
+          "type": "Float"
+        },
+        {
+          "name": "relative z",
+          "type": "Float"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Teleport",
+      "source": "Code/MethodSystem/Methods/TeleportMethods/TPRoomMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "TPSpawn",
+      "description": "Teleports players to where a specified role would spawn.",
+      "arguments": [
+        {
+          "name": "players to teleport",
+          "type": "Players"
+        },
+        {
+          "name": "spawnpoint of role",
+          "type": "Enum<RoleTypeId>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Teleport",
+      "source": "Code/MethodSystem/Methods/TeleportMethods/TPSpawnMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "AddTeslaIgnoreRule",
+      "description": "Sets the players that will be ignored by a tesla.",
+      "arguments": [
+        {
+          "name": "players",
+          "type": "Players"
+        },
+        {
+          "name": "remove id",
+          "type": "Text"
+        },
+        {
+          "name": "update",
+          "type": "Bool"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "TeslaRule",
+      "source": "Code/MethodSystem/Methods/TeslaRuleMethods/AddTeslaIgnoreRuleMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "RemoveTeslaIgnoreRule",
+      "description": "Resets the list of players ignored by a tesla.",
+      "arguments": [
+        {
+          "name": "id to remove",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "TeslaRule",
+      "source": "Code/MethodSystem/Methods/TeslaRuleMethods/RemoveTeslaIgnoreRuleMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Text.Contains",
+      "description": "Returns true or false indicating if the provided text contains a provided value.",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "Text"
+        },
+        {
+          "name": "text to check for",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Text",
+      "source": "Code/MethodSystem/Methods/TextMethods/Text_ContainsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Text.Pad",
+      "description": "Fills the text from the left or right with the given character until the specified length is met",
+      "arguments": [
+        {
+          "name": "text to pad",
+          "type": "Text"
+        },
+        {
+          "name": "pad direction",
+          "type": "Options"
+        },
+        {
+          "name": "length",
+          "type": "Int"
+        },
+        {
+          "name": "character",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Text",
+      "source": "Code/MethodSystem/Methods/TextMethods/Text_PadMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Text.Replace",
+      "description": "Replaces given values in a given text.",
+      "arguments": [
+        {
+          "name": "value to perform the replacement on",
+          "type": "Text"
+        },
+        {
+          "name": "text to replace",
+          "type": "Text"
+        },
+        {
+          "name": "replacement text",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Text",
+      "source": "Code/MethodSystem/Methods/TextMethods/Text_ReplaceMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Text.Slice",
+      "description": "Slices off characters from beginning and end of a text value.",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "Text"
+        },
+        {
+          "name": "beginning amount",
+          "type": "Int"
+        },
+        {
+          "name": "end amount",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Text",
+      "source": "Code/MethodSystem/Methods/TextMethods/Text_SliceMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Text.Trim",
+      "description": "Trims the text value from whitspaces at the beginning and end.",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Text",
+      "source": "Code/MethodSystem/Methods/TextMethods/Text_TrimMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Date.Current",
+      "description": "Returns the current date.",
+      "arguments": [
+        {
+          "name": "time zone",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Time",
+      "source": "Code/MethodSystem/Methods/TimeMethods/Date_CurrentMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Date.Offset",
+      "description": "Adds an offset to a date.",
+      "arguments": [
+        {
+          "name": "date",
+          "type": "Reference<DateTime>"
+        },
+        {
+          "name": "mode",
+          "type": "Options"
+        },
+        {
+          "name": "offset",
+          "type": "Duration"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Time",
+      "source": "Code/MethodSystem/Methods/TimeMethods/Date_OffsetMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "FormatDuration",
+      "description": "Formats a duration into a special format.",
+      "arguments": [
+        {
+          "name": "duration to format",
+          "type": "Duration"
+        },
+        {
+          "name": "format",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Time",
+      "source": "Code/MethodSystem/Methods/TimeMethods/FormatDurationMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "TimeInfo",
+      "description": "Returns information about current time.",
+      "arguments": [
+        {
+          "name": "options",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Time",
+      "source": "Code/MethodSystem/Methods/TimeMethods/TimeInfoMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "ToDuration",
+      "description": "Creates a duration value from a number and a unit.",
+      "arguments": [
+        {
+          "name": "length",
+          "type": "Float"
+        },
+        {
+          "name": "unit",
+          "type": "Enum<DurationUnit>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Time",
+      "source": "Code/MethodSystem/Methods/TimeMethods/ToDurationMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "UCR.GetPlayersWithRole",
+      "description": "Gets all players who have a provided UCR role.",
+      "arguments": [
+        {
+          "name": "role id",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "UCR",
+      "source": "Code/MethodSystem/Methods/UCRMethods/UCR_GetPlayersWithRoleMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "UCR.GetRole",
+      "description": "Returns a reference to the UCR role a player has.",
+      "arguments": [
+        {
+          "name": "player",
+          "type": "Player"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "UCR",
+      "source": "Code/MethodSystem/Methods/UCRMethods/UCR_GetRoleMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "UCR.SetRole",
+      "description": "Sets the UCR role of a player.",
+      "arguments": [
+        {
+          "name": "player",
+          "type": "Player"
+        },
+        {
+          "name": "role id",
+          "type": "Int"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "UCR",
+      "source": "Code/MethodSystem/Methods/UCRMethods/UCR_SetRoleMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "GetVariableByName",
+      "description": "Returns the value of a variable with the given name and prefix.",
+      "arguments": [
+        {
+          "name": "variable name",
+          "type": "Text"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Variable",
+      "source": "Code/MethodSystem/Methods/VariableMethods/GetVariableByNameMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "GlobalVariables",
+      "description": "Returns a collection containing all the global variable names",
+      "arguments": [],
+      "aliases": [],
+      "subgroup": "Variable",
+      "source": "Code/MethodSystem/Methods/VariableMethods/GlobalVariablesMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "LogVar",
+      "description": "Returns a formatted version of the variable for logging purposes.",
+      "arguments": [
+        {
+          "name": "variable",
+          "type": "Variable"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Variable",
+      "source": "Code/MethodSystem/Methods/VariableMethods/LogVarMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "VarExists",
+      "description": "Returns a bool value indicating if the provided variable exists.",
+      "arguments": [
+        {
+          "name": "variable",
+          "type": "Token<VariableToken>"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Variable",
+      "source": "Code/MethodSystem/Methods/VariableMethods/VarExistsMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "Warhead",
+      "description": "Manages alpha warhead.",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Warhead",
+      "source": "Code/MethodSystem/Methods/WarheadMethods/WarheadMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    },
+    {
+      "name": "WarheadInfo",
+      "description": "Returns information about Alpha Warhead",
+      "arguments": [
+        {
+          "name": "property",
+          "type": "Options"
+        }
+      ],
+      "aliases": [],
+      "subgroup": "Warhead",
+      "source": "Code/MethodSystem/Methods/WarheadMethods/WarheadInfoMethod.cs",
+      "runtime_permission": "DENY_BY_DEFAULT"
+    }
+  ]
+}

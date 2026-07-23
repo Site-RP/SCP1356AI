@@ -1,0 +1,26 @@
+# Disabled by default: remove # from the filename to enable this script.
+# this script makes SCP-173 drop pills or a medkit on damage, like a pinata
+
+!-- OnEvent Hurt
+-- require @evPlayer @evAttacker
+
+# Only trigger if the victim is SCP-173
+if {@evPlayer -> role} isnt "Scp173"
+    stop
+end
+
+# Trigger only with 5% chance
+chance 95%
+    stop
+end
+
+# 80% to get pills, 20% to get medkit
+chance 80%
+    *pickup = CreatePickup Painkillers
+else
+    *pickup = CreatePickup Medkit
+end
+
+SpawnPickupPlayer *pickup @evPlayer
+
+Hint @evAttacker 3s "The piñata dropped some medicaments!"
